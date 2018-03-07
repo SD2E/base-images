@@ -26,6 +26,9 @@ builds: $(BUILDS)
 images: $(IMAGES)
 	true
 
+all: images
+	true
+
 base-build:
 	bash scripts/build_bases.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(BASE)
 

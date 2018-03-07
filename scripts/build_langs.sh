@@ -46,10 +46,10 @@ do
         for VERSION in ${DISTVERSIONS}
         do
             echo "  Building ${TENANT_DOCKER_ORG}/${LANG}:${VERSION}${CHANNEL}"
-            if [ -f "Dockerfile.${VERSION}" ]; then
-                bash $DIR/docker_helper.sh "${TENANT_DOCKER_ORG}/${LANG}" "${VERSION}${CHANNEL}" "Dockerfile.${VERSION}" "${COMMAND}"
+            if [ -f "Dockerfile.${VERSION}${CHANNEL}" ]; then
+                bash $DIR/docker_helper.sh "${TENANT_DOCKER_ORG}/${LANG}" "${VERSION}${CHANNEL}" "Dockerfile.${VERSION}${CHANNEL}" "${COMMAND}"
             else
-                echo "Dockerfile${CHANNEL} for ${VERSION} not found. Skipped."
+                echo "Dockerfile.${VERSION}${CHANNEL} not found. Skipped."
             fi
         done
         cd ${OWD}

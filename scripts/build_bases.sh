@@ -33,11 +33,11 @@ OWD=${PWD}
 cd ${DIR}/../base
 for VERSION in ${DISTVERSIONS}
 do
-    if [ -f "Dockerfile.${VERSION}" ]; then
+    if [ -f "Dockerfile.${VERSION}${CHANNEL}" ]; then
         echo "Building ${TENANT_DOCKER_ORG}/base:${VERSION}${CHANNEL}"
         bash ${DIR}/docker_helper.sh "${TENANT_DOCKER_ORG}/base" "${VERSION}${CHANNEL}" "Dockerfile.${VERSION}${CHANNEL}" "${COMMAND}"
     else
-        echo "Dockerfile${CHANNEL} for ${VERSION} not found. Skipped."
+        echo "Dockerfile.${VERSION}${CHANNEL} not found. Skipped."
     fi
 done
 cd ${OWD}
