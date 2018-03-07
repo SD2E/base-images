@@ -3,15 +3,17 @@ services:
   - docker
 env:
   matrix:
-    - LANGUAGE=python2
-    - LANGUAGE=python3
-    - BASE=ubuntu16
-    - BASE=ubuntu17
+    - CHANNEL=stable LANGUAGE=python2 BASE=ubuntu16
+    - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu16
+    - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu16
+    - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu16
+    - CHANNEL=stable LANGUAGE=python2 BASE=ubuntu17
+    - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu17
+    - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu17
+    - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu17
   global:
     - REGISTRY_ORG=sd2e
     - REGISTRY_USER=sd2etest
-    - CHANNEL=edge
-    - CHANNEL=stable
     # REGISTRY_PASS=...
 
 script:
