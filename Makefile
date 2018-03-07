@@ -1,9 +1,8 @@
 include config.mk
 
-CHANNEL := "stable"
+CHANNEL := stable
 BASE := ""
 LANGUAGE := ""
-REACTOR := ""
 
 TENANT_NAME := $(TENANT_NAME)
 TENANT_ID := $(TENANT_KEY)

@@ -3,8 +3,6 @@ services:
   - docker
 env:
   matrix:
-    - CHANNEL=edge
-    - CHANNEL=stable
     - LANGUAGE=python2
     - LANGUAGE=python3
     - BASE=ubuntu16
@@ -14,6 +12,8 @@ env:
   global:
     - REGISTRY_ORG=sd2e
     - REGISTRY_USER=sd2etest
+    - CHANNEL=edge
+    - CHANNEL=stable
     # REGISTRY_PASS=...
 
 script:
@@ -22,7 +22,7 @@ script:
   - make reactors-build CHANNEL=$CHANNEL LANGUAGE=$LANGUAGE
 
 after_script:
-  - docker images REGISTRY_ORG/*
+  - docker images $REGISTRY_ORG/*
 
 # before_deploy:
 #   - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
