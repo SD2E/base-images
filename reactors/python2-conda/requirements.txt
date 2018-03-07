@@ -1,0 +1,9 @@
+AttrDict>=2.0.0
+PyYAML>=3.12
+agavepy>=0.6.1
+hashids>=1.2.0
+jmespath>=0.9.3
+jsonschema>=2.6.0
+petname>=2.2
+python-jsonschema-objects==0.3.1
+pytz>=2017.2

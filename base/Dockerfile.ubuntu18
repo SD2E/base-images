@@ -1,0 +1,32 @@
+FROM ubuntu:18.04
+LABEL ORG=sd2e.org IMAGE=base
+LABEL cloud.tacc.project="DARPA SD2E"
+
+# Basics
+RUN apt-get -y update && \
+    apt-get -y install apt-utils bash curl dialog git vim rsync && \
+    apt-get clean
+
+# jq for parsing JSON
+RUN curl -L -sk -o /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" \
+    && chmod a+x /usr/local/bin/jq
+
+#### This is a temporary fix for an issue with OverlayFS on TACC systems ###
+
+LABEL description="Additional root-level directories to avoid needing OverlayFS @ TACC HPC"
+RUN mkdir -p /work && chown root:root /work
+RUN mkdir -p /gpfs && chown root:root /gpfs
+RUN mkdir -p /data && chown root:root /data
+RUN mkdir -p /scratch && chown root:root /scratch
+
+#### End temporary fix
+
+# In-container volumes
+# (For containers launched using TACC.cloud SSO identity)
+ARG CORRAL=/corral
+ARG STOCKYARD=/work/projects
+ARG PROJECT=""
+
+ENV _PROJ_CORRAL=${CORRAL}
+ENV _PROJ_STOCKYARD=${STOCKYARD}/${PROJECT}
+ENV _USER_WORK=

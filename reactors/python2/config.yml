@@ -1,0 +1,4 @@
+# This is a placeholder config.yml file to demonstrate that
+# automatic config reading and OBBUILD support works
+---
+key1: 'value1'
