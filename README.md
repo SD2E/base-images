@@ -9,10 +9,9 @@ this arrangement.
 
 ## Architecture
 
-Images are layered hierarchically, to promote layer caching but, more
-importantly, to raise the level of assurance that foundational configurations
-and computational assets are propagated automatically via the container 
-environment.
+Images are layered hierarchically to promote layer caching and help ensure
+that essential configurations and computational assets get propagated 
+to developers and researchers relying on them. 
 
 ```
 +-------------+
@@ -42,17 +41,15 @@ environment.
 
 ## Container image types
 
-There are five classes of image currently supported:
+There are three classes of image currently supported:
 
 * base : foundation layer for other images
-* jupyterhub-user : shared infrastructure for container and HPC Jupyter
 * language : images configured to support development in a specific language
-* apps : extension of the language environment supporting Agave apps
 * reactors : extension of the language environment supporting Reactors
 
-## Features
-
-TBD
+Two more are coming soon:
+* jupyterhub-user : shared infrastructure for container and HPC Jupyter
+* apps : extension of the language environment supporting Agave apps
 
 ## Building
 
@@ -85,5 +82,6 @@ make languages-build LANGUAGE=python2 BASE=ubuntu16 CHANNEL=edge
 ## Testing
 
 Formal testing is not yet implemented, though container builds are conducted 
-automatically via TravisCI on push to any branch. Eventually, master will
-be protected and used as a trigger to push built images to DockerHub.
+automatically via TravisCI on push to any branch. Images are pushed automatically
+to the SD2E DockerHub registry on successful commits to `master`. 
+
