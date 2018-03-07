@@ -70,7 +70,7 @@ Development is Makefile-driven, with parameterization via build variables.
 | build all images         | make builds                  |                                           |                             |
 | specific image type      | make <type>(-build)          | apps, base, jupyter,  languages, reactors |                             |
 | specific release channel | make <target>-(build)        | stable, edge                              | CHANNEL=<channel>           |
-| specific base            | make base-(build)            | ubuntu14, ubuntu16,  ubuntu17, ubuntu18   | BASE=<dist>                 |
+| specific base            | make base-(build)            | ubuntu16, ubuntu17                        | BASE=<dist>                 |
 | specific language        | make language-(build)        | python2, python3                          | LANGUAGE=<lang>             |
 | specific language + base | make [apps,reactors]-(build) | see above                                 | LANGUAGE=<lang> BASE=<dist> |
 ```

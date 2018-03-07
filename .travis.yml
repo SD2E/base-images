@@ -6,9 +6,7 @@ env:
     - LANGUAGE=python2
     - LANGUAGE=python3
     - BASE=ubuntu16
-    - BASE=ubuntu16
     - BASE=ubuntu17
-    - BASE=ubuntu18
   global:
     - REGISTRY_ORG=sd2e
     - REGISTRY_USER=sd2etest

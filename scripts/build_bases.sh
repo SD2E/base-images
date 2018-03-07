@@ -20,7 +20,7 @@ if [ ! -z "${DIST}" ]
 then
     DISTVERSIONS="${DIST}"
 else
-    DISTVERSIONS="alpine36 ubuntu14 ubuntu16 ubuntu17 ubuntu18"
+    DISTVERSIONS="alpine36 ubuntu16 ubuntu17"
 fi
 
 echo "** CONFIG **"
