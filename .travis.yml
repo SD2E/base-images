@@ -26,6 +26,6 @@ after_script:
 
 deploy:
   provider: script
-  script: for IMG in `docker images ${REGISTRY_ORG}/* | awk '{ print $1":"$2 }'`; do docker push ${IMG}; done
+  script: bash scripts/push_containers_from_ci.sh ${REGISTRY_ORG}
   on:
     branch: master
