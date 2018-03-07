@@ -2,8 +2,9 @@ sudo: required
 services:
   - docker
 env:
-  - CHANNEL=edge
-  - CHANNEL=stable
+  matrix:
+    - CHANNEL=edge
+    - CHANNEL=stable
   global:
     - REGISTRY_ORG=sd2e
     - REGISTRY_USER=sd2etest
