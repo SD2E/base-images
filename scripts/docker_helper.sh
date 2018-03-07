@@ -1,7 +1,7 @@
 #!/bin/bash
 
-IMAGENAME=$1
-SDKVERSION=$2
+IMAGE=$1
+TAG=$2
 DOCKERFILE=$3
 COMMAND=$4
 
@@ -20,18 +20,18 @@ if [ $? -ne 0 ] ; then die "Docker not found or unreachable. Exiting." ; fi
 if [[ "$COMMAND" == 'build' ]];
 then
 
-echo "image: $IMAGENAME"
-echo "version: $SDKVERSION"
-echo "dockerfile: $DOCKERFILE"
-echo "cmd: $COMMAND"
+echo "Image: $IMAGE"
+echo "Tag: $TAG"
+echo "Dockerfile: $DOCKERFILE"
+echo "Command: $COMMAND"
 
-docker build --rm=true -t ${IMAGENAME}:${SDKVERSION} -f ${DOCKERFILE} .
+docker build --rm=true -t ${IMAGE}:${TAG} -f ${DOCKERFILE} .
 if [ $? -ne 0 ] ; then die "Error on build. Exiting." ; fi
 
-IMAGEID=`docker images -q  ${IMAGENAME}:${SDKVERSION}`
-if [ $? -ne 0 ] ; then die "Can't find image ${TENANT_DOCKER_ORG}/${IMAGENAME}:${SDKVERSION}. Exiting." ; fi
+IMAGEID=`docker images -q  ${IMAGE}:${TAG}`
+if [ $? -ne 0 ] ; then die "Can't find image ${TENANT_DOCKER_ORG}/${IMAGE}:${TAG}. Exiting." ; fi
 
-docker tag ${IMAGEID} ${IMAGENAME}:latest
+docker tag ${IMAGEID} ${IMAGE}:latest
 if [ $? -ne 0 ] ; then die "Error tagging with 'latest'. Exiting." ; fi
 
 fi
@@ -40,7 +40,7 @@ fi
 if [[ "$COMMAND" == 'release' ]];
 then
 
-docker push ${IMAGENAME}:${SDKVERSION}
+docker push ${IMAGE}:${TAG}
 
 if [ $? -ne 0 ] ; then die "Error pushing to Docker Hub. Exiting." ; fi
 fi
@@ -49,7 +49,7 @@ fi
 if [[ "$COMMAND" == 'clean' ]];
 then
 
-docker rmi -f ${IMAGENAME}:${SDKVERSION} && docker rmi -f ${IMAGENAME}:latest
+docker rmi -f ${IMAGE}:${TAG} && docker rmi -f ${IMAGE}:latest
 
 if [ $? -ne 0 ] ; then die "Error deleting local images. Exiting." ; fi
 fi

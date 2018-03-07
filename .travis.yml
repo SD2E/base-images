@@ -5,17 +5,21 @@ env:
   matrix:
     - CHANNEL=edge
     - CHANNEL=stable
+    - LANGUAGE=python2
+    - LANGUAGE=python3
+    - BASE=ubuntu16
+    - BASE=ubuntu16
+    - BASE=ubuntu17
+    - BASE=ubuntu18
   global:
     - REGISTRY_ORG=sd2e
     - REGISTRY_USER=sd2etest
     # REGISTRY_PASS=...
 
 script:
-  - make base-build
-  - make lang-build
-  - make apps-build
-  - make jupyter-build
-  - make reactors-build
+  - make base-build CHANNEL=$CHANNEL BASE=$BASE
+  - make lang-build CHANNEL=$CHANNEL LANGUAGE=$LANGUAGE BASE=$BASE
+  - make reactors-build CHANNEL=$CHANNEL LANGUAGE=$LANGUAGE
 
 after_script:
   - docker images REGISTRY_ORG/*

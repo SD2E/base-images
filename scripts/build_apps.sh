@@ -6,7 +6,7 @@ COMMAND=$3
 
 CHANNEL=""
 if [ "$RELEASE" != "stable" ]; then
-    CHANNEL="-${CHANNEL}"
+    CHANNEL="-${RELEASE}"
 fi
 
 if [ -z "$COMMAND" ]; then
