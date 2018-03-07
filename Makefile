@@ -34,25 +34,25 @@ base-build:
 base: base-build
 	bash scripts/build_bases.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(BASE)
 
-languages-build:
+languages-build: base-build
 	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
 
 languages: languages-build
 	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE) $(BASE) 
 
-apps-build:
+apps-build: languages-build
 	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build
 
 apps: apps-build
 	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release
 
-jupyter-build:
+jupyter-build: base-build
 	bash scripts/build_jupyter.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build
 
 jupyter: jupyter-build
 	bash scripts/build_jupyter.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release
 
-reactors-build:
+reactors-build: languages-build
 	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE)
 
 reactors: reactors-build
