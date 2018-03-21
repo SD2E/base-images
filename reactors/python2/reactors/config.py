@@ -37,7 +37,7 @@ def read_config():
                         config = yaml.safe_load(conf)
                         if config is None:
                             config = {}
-                        config = AttrDict(conf)
+                        config = AttrDict(config)
                     except yaml.YAMLError as e:
                         if hasattr(e, 'problem_mark'):
                             mark = e.problem_mark

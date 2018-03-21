@@ -34,7 +34,7 @@ base-build:
 base: base-build
 	bash scripts/build_bases.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(BASE)
 
-languages-build: base-build
+languages-build:
 	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
 
 languages: languages-build

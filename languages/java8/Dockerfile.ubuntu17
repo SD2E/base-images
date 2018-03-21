@@ -1,0 +1,16 @@
+FROM sd2e/base:ubuntu17
+LABEL ORG=sd2e.org IMAGE=java8
+
+ARG LANGUAGE=java8
+ARG AGAVEPY_BRANCH=develop
+
+RUN apt-get -y update && \
+    apt-get -y install build-essential \
+                       openjdk-8-jdk-headless \
+                       ant \
+                       gradle \
+                       maven \
+                       libssl-dev \
+                       libffi-dev  && \
+    apt-get clean
+

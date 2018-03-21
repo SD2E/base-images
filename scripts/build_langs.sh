@@ -21,7 +21,7 @@ if [ ! -z "${LANGUAGE}" ]
 then
     LANGVERSIONS="${LANGUAGE}"
 else
-    LANGVERSIONS="python2 python3"
+    LANGVERSIONS="python2 python3 java8"
 fi
 
 if [ ! -z "${DIST}" ]

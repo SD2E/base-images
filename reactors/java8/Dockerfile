@@ -1,6 +1,6 @@
-FROM sd2e/python2:ubuntu16
+FROM sd2e/java8:ubuntu17
 
-ARG LANGUAGE=python2
+ARG LANGUAGE=java8
 ARG VERSION=0.5.5
 ARG AGAVEPY_BRANCH=develop
 ARG SCRATCH=/mnt/ephemeral-01
@@ -14,7 +14,7 @@ ENV REACTORS_VERSION=${VERSION}
 # that all UIDs can write to. It will
 # of course, not survive when
 # the container is torn down.
-#
+# 
 # Other entries in /mnt/ will
 # be various types of persistent
 # storage
@@ -24,26 +24,26 @@ RUN mkdir -p ${SCRATCH} && \
     chmod g+rwxs ${SCRATCH}
 ENV _REACTOR_TEMP=${SCRATCH}
 
-# Essential Python2 requirements
-ADD requirements-py2.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
-RUN pip install --upgrade git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
+# # Core Python3 requirements
+# ADD requirements-py3.txt /tmp/requirements.txt
+# RUN pip3 install -r /tmp/requirements.txt
+# RUN pip3 install --upgrade git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 # In-progress language libraries
 
-ADD reactors /reactors
-ADD agaveutils /agaveutils
+# ADD reactors /reactors
+# ADD agaveutils /agaveutils
 
 # Default actor and config files
-ADD reactor.py /
+#ADD reactor.py /
 ADD config.yml /
-CMD ["python", "/reactor.py"]
+CMD ["java"]
 
 # Onbuild support
-ONBUILD ADD requirements.txt /tmp/requirements.txt
-ONBUILD RUN pip install -r /tmp/requirements.txt
-ONBUILD ADD reactor.py /reactor.py
-ONBUILD ADD config.yml /config.yml
+#ONBUILD ADD requirements.txt /tmp/requirements.txt
+#ONBUILD RUN pip3 install -r /tmp/requirements.txt
+#ONBUILD ADD reactor.java /
+ONBUILD ADD config.yml /
 
 # Close out making absolutely sure that work directory is set
 WORKDIR ${SCRATCH}

@@ -21,7 +21,7 @@ if [ ! -z "$LANGUAGE" ]
 then
     LANGVERSIONS="$LANGUAGE"
 else
-    LANGVERSIONS="python2 python3 bash ruby golang"
+    LANGVERSIONS="python2 python3 java8 bash ruby golang"
 fi
 
 if [ ! -z "$DIST" ]
