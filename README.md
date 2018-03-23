@@ -2,16 +2,16 @@
 
 [![Build Status](https://travis-ci.org/SD2E/base-images.svg?branch=master)](https://travis-ci.org/SD2E/base-images)
 
-This repository supports development, maintenance, and extension of the base 
+This repository supports development, maintenance, and extension of the base
 images used by the SD2 program to sharing code and capabilities. A matrix of
 Linux distributions and high-level languages is supported efficiently by
-this arrangement. 
+this arrangement.
 
 ## Architecture
 
 Images are layered hierarchically to promote layer caching and help ensure
-that essential configurations and computational assets get propagated 
-to developers and researchers relying on them. 
+that essential configurations and computational assets get propagated
+to developers and researchers relying on them.
 
 ```
 +-------------+
@@ -72,6 +72,8 @@ Development is Makefile-driven, with parameterization via build variables.
 | specific language + base | make [apps,reactors]-(build) | see above                                 | LANGUAGE=<lang> BASE=<dist> |
 ```
 
+You can also set `NO_CACHE=1` to force a completely fresh build.
+
 For example, the following command builds, but doesn't push, the `python2`
 language image based on `ubuntu16` using `Dockerfile-edge`.
 
@@ -81,7 +83,7 @@ make languages-build LANGUAGE=python2 BASE=ubuntu16 CHANNEL=edge
 
 ## Testing
 
-Formal testing is not yet implemented, though container builds are conducted 
+Formal testing is not yet implemented, though container builds are conducted
 automatically via TravisCI on push to any branch. Images are pushed automatically
-to the SD2E DockerHub registry on successful commits to `master`. 
+to the SD2E DockerHub registry on successful commits to `master`.
 

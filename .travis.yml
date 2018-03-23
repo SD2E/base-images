@@ -14,12 +14,13 @@ env:
   global:
     - REGISTRY_ORG=sd2e
     - REGISTRY_USER=sd2etest
+    - NO_CACHE=1
     # REGISTRY_PASS=...
 
 script:
-  - make base-build CHANNEL=$CHANNEL BASE=$BASE
-  - make languages-build CHANNEL=$CHANNEL LANGUAGE=$LANGUAGE BASE=$BASE
-  - make reactors-build CHANNEL=$CHANNEL LANGUAGE=$LANGUAGE
+  - make base-build CHANNEL=$CHANNEL BASE=$BASE NO_CACHE=$NO_CACHE
+  - make languages-build CHANNEL=$CHANNEL LANGUAGE=$LANGUAGE BASE=$BASE NO_CACHE=$NO_CACHE
+  - make reactors-build CHANNEL=$CHANNEL LANGUAGE=$LANGUAGE NO_CACHE=$NO_CACHE
 
 after_script:
   - docker images ${REGISTRY_ORG}/*

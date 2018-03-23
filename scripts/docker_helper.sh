@@ -14,18 +14,25 @@ function die {
 
 }
 
+
 DOCKER_INFO=`docker info > /dev/null`
 if [ $? -ne 0 ] ; then die "Docker not found or unreachable. Exiting." ; fi
 
 if [[ "$COMMAND" == 'build' ]];
 then
 
+buildopts="--rm=true "
+if [ ! -z "$NO_CACHE" ]; then
+    buildopts="$buildopts --no-cache"
+fi
+
 echo "Image: $IMAGE"
 echo "Tag: $TAG"
 echo "Dockerfile: $DOCKERFILE"
 echo "Command: $COMMAND"
+echo "Build Opts: ${buildopts}"
 
-docker build --rm=true -t ${IMAGE}:${TAG} -f ${DOCKERFILE} .
+docker build ${buildopts} -t ${IMAGE}:${TAG} -f ${DOCKERFILE} .
 if [ $? -ne 0 ] ; then die "Error on build. Exiting." ; fi
 
 IMAGEID=`docker images -q  ${IMAGE}:${TAG}`
