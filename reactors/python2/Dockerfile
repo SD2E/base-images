@@ -2,7 +2,7 @@ FROM sd2e/python2:ubuntu16
 
 ARG LANGUAGE=python2
 ARG VERSION=0.5.5
-ARG AGAVEPY_BRANCH=develop
+ARG AGAVEPY_BRANCH=master
 ARG SCRATCH=/mnt/ephemeral-01
 
 # Discoverable version inside the container
