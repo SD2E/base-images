@@ -7,6 +7,12 @@ images used by the SD2 program to sharing code and capabilities. A matrix of
 Linux distributions and high-level languages is supported efficiently by
 this arrangement.
 
+## Images Catalog
+
+|                base                |                     languages                    |                apps               |                         reactors                         |
+|:----------------------------------:|:------------------------------------------------:|:---------------------------------:|:--------------------------------------------------------:|
+| alpine36 centos7 ubuntu16 ubuntu17 | ubuntu16/python2 ubuntu17/python3 ubuntu17/java8 | python2/ubuntu16 python3/ubuntu17 | python2/ubuntu16 python2-conda/ubuntu16 python3/ubuntu17 |
+
 ## Architecture
 
 Images are layered hierarchically to promote layer caching and help ensure
@@ -28,7 +34,7 @@ to developers and researchers relying on them.
            |
 +---------------------------+  +-------------------------+
 |                           |  |                         |
-| sd2e/<lang>:<dist>(-edge) |..| sd2e/apps:<lang>(-edge) |
+| sd2e/<lang>:<dist>(-edge) |--| sd2e/apps:<lang>(-edge) |
 |                           |  |                         |
 +---------------------------+  +-------------------------+
            |
@@ -45,11 +51,11 @@ There are three classes of image currently supported:
 
 * base : foundation layer for other images
 * language : images configured to support development in a specific language
+* apps : extension of the language environment supporting Agave apps
 * reactors : extension of the language environment supporting Reactors
 
 Two more are coming soon:
 * jupyterhub-user : shared infrastructure for container and HPC Jupyter
-* apps : extension of the language environment supporting Agave apps
 
 ## Building
 

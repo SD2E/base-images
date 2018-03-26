@@ -38,13 +38,13 @@ languages-build:
 	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
 
 languages: languages-build
-	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE) $(BASE) 
+	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE) $(BASE)
 
 apps-build: languages-build
-	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build
+	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
 
 apps: apps-build
-	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release
+	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE) $(BASE)
 
 jupyter-build: base-build
 	bash scripts/build_jupyter.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build
