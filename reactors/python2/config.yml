@@ -2,3 +2,6 @@
 # automatic config reading and OBBUILD support works
 ---
 key1: 'value1'
+logs:
+  level: 'DEBUG'
+  file: 'reactor.log'

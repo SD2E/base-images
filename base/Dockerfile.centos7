@@ -26,6 +26,7 @@ RUN mkdir -p /scratch && chown root:root /scratch
 ARG CORRAL=/corral
 ARG STOCKYARD=/work/projects
 ARG PROJECT=""
+ARG CHANNEL=stable
 
 ENV _PROJ_CORRAL=${CORRAL}
 ENV _PROJ_STOCKYARD=${STOCKYARD}/${PROJECT}

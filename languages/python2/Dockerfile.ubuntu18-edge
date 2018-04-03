@@ -1,7 +1,7 @@
 FROM sd2e/base:ubuntu18
 LABEL ORG=sd2e.org IMAGE=python2
 
-ARG CHANNEL=stable
+ARG CHANNEL=edge
 ARG LANGUAGE=python2
 ARG BASE=ubuntu18
 
@@ -15,9 +15,6 @@ RUN apt-get -y update && \
                libssl-dev \
                libffi-dev  && \
     apt-get clean
-
-RUN pip install --upgrade pip
-RUN pip install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 ADD requirements-${CHANNEL}.txt /requirements.txt
 RUN pip install --upgrade --no-cache-dir --upgrade -r /requirements.txt

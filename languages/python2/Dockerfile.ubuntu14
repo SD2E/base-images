@@ -1,7 +1,10 @@
 FROM sd2e/base:ubuntu14
 LABEL ORG=sd2e.org IMAGE=python2
 
+ARG CHANNEL=stable
 ARG LANGUAGE=python2
+ARG BASE=ubuntu14
+
 ARG AGAVEPY_BRANCH=develop
 
 RUN apt-get -y update && \
@@ -14,9 +17,11 @@ RUN apt-get -y update && \
     apt-get clean
 
 # setuptools is key - otherwise cryptography>=1.9 has abandoned Py < 3!
-RUN pip install --upgrade pip setuptools 
+RUN pip install --upgrade pip setuptools
 # Installing pyOpenSSL has to happen *after* updating setuptools
 RUN pip install --upgrade pyOpenSSL
 # Now, we can install AgavePy and other HTTPS-intensive modules under Ubu14/Py2
 RUN pip install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
+ADD requirements-${CHANNEL}.txt /requirements.txt
+RUN pip install --upgrade --no-cache-dir --upgrade -r /requirements.txt

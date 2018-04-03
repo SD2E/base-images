@@ -1,7 +1,10 @@
 FROM sd2e/base:ubuntu17
 LABEL ORG=sd2e.org IMAGE=python2
 
+ARG CHANNEL=stable
 ARG LANGUAGE=python2
+ARG BASE=ubuntu17
+
 ARG AGAVEPY_BRANCH=develop
 
 RUN apt-get -y update && \
@@ -15,3 +18,6 @@ RUN apt-get -y update && \
 
 RUN pip install --upgrade pip
 RUN pip install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@develop
+
+ADD requirements-${CHANNEL}.txt /requirements.txt
+RUN pip install --upgrade --no-cache-dir --upgrade -r /requirements.txt

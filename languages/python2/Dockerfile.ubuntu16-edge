@@ -1,11 +1,11 @@
-FROM sd2e/base:ubuntu18
+FROM sd2e/base:ubuntu16
 LABEL ORG=sd2e.org IMAGE=python2
 
-ARG CHANNEL=stable
+ARG CHANNEL=edge
 ARG LANGUAGE=python2
-ARG BASE=ubuntu18
+ARG BASE=ubuntu16
 
-ARG AGAVEPY_BRANCH=develop
+ARG AGAVEPY_BRANCH=master
 
 RUN apt-get -y update && \
     apt-get -y install build-essential \
@@ -18,6 +18,9 @@ RUN apt-get -y update && \
 
 RUN pip install --upgrade pip
 RUN pip install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
+
+ADD requirements-${CHANNEL}.txt /requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 
 ADD requirements-${CHANNEL}.txt /requirements.txt
 RUN pip install --upgrade --no-cache-dir --upgrade -r /requirements.txt

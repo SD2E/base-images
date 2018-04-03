@@ -36,3 +36,5 @@ if os.environ.get('_REACTOR_TEMP') is not None:
         _paffs.reactor.default = _paffs.reactor.scratch
 
 paths = _paffs
+
+# Verified Py3 compatible

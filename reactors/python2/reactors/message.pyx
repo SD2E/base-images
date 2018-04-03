@@ -17,6 +17,7 @@ SCHEMA_FILE = 'message.json'
 builder = None
 ns = None
 
+
 def read_schema():
     """
     Reads JSON schema into 'settings', allowing optional
@@ -34,6 +35,6 @@ def read_schema():
                         builder = pjs.ObjectBuilder(fname)
                         ns = builder.build_classes()
                     except Exception as e:
-                            print("Error loading schema {}: {}".format(fname, e))
-                            pass
-                break
+                        print("Error loading schema {}: {}".format(fname, e))
+                        pass
+                    break

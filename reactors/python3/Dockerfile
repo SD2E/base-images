@@ -1,5 +1,6 @@
 FROM sd2e/python3:ubuntu17
 
+ARG CHANNEL=edge
 ARG LANGUAGE=python3
 ARG VERSION=0.5.5
 ARG AGAVEPY_BRANCH=develop
@@ -14,7 +15,7 @@ ENV REACTORS_VERSION=${VERSION}
 # that all UIDs can write to. It will
 # of course, not survive when
 # the container is torn down.
-# 
+#
 # Other entries in /mnt/ will
 # be various types of persistent
 # storage
@@ -25,7 +26,7 @@ RUN mkdir -p ${SCRATCH} && \
 ENV _REACTOR_TEMP=${SCRATCH}
 
 # Core Python3 requirements
-ADD requirements-py3.txt /tmp/requirements.txt
+ADD requirements-${LANGUAGE}.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt
 RUN pip3 install --upgrade git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
@@ -41,7 +42,7 @@ CMD ["python3", "/reactor.py"]
 
 # Onbuild support
 ONBUILD ADD requirements.txt /tmp/requirements.txt
-ONBUILD RUN pip3 install -r /tmp/requirements.txt
+ONBUILD RUN pip3 install --upgrade -r /tmp/requirements.txt
 ONBUILD ADD reactor.py /
 ONBUILD ADD config.yml /
 

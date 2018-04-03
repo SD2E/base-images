@@ -7,4 +7,5 @@ jsonschema>=2.6.0
 petname>=2.2
 python-jsonschema-objects==0.3.1
 pytz>=2017.2
+tacconfig>=0.5.0
 urllib3>=1.22

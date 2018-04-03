@@ -1,7 +1,10 @@
 FROM sd2e/base:ubuntu18
 LABEL ORG=sd2e.org IMAGE=python3
 
+ARG CHANNEL=stable
 ARG LANGUAGE=python3
+ARG BASE=ubuntu18
+
 ARG AGAVEPY_BRANCH=develop
 
 RUN apt-get -y update && \
@@ -17,3 +20,6 @@ RUN apt-get -y update && \
 
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
+
+ADD requirements-${CHANNEL}.txt /requirements.txt
+RUN pip3 install --upgrade --no-cache-dir --upgrade -r /requirements.txt

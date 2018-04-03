@@ -12,9 +12,11 @@ COMMAND=$3
 LANGUAGE=$4
 DIST=$5
 
-CHANNEL=""
+CHANNEL="stable"
+CHANNELTAG=""
 if [ "${RELEASE}" != "stable" ]; then
-    CHANNEL="-${RELEASE}"
+    CHANNELTAG="-${RELEASE}"
+    CHANNEL="${RELEASE}"
 fi
 
 if [ ! -z "${LANGUAGE}" ]
@@ -45,11 +47,18 @@ do
         cd ${DIR}/../apps/${LANG}
         for VERSION in ${DISTVERSIONS}
         do
-            echo "  Building ${TENANT_DOCKER_ORG}/${LANG}:${VERSION}${CHANNEL}"
-            if [ -f "Dockerfile.${VERSION}${CHANNEL}" ]; then
-                bash $DIR/docker_helper.sh "${TENANT_DOCKER_ORG}/apps" "${LANG}${CHANNEL}" "Dockerfile.${VERSION}${CHANNEL}" "${COMMAND}"
+            echo "  Building ${TENANT_DOCKER_ORG}/${LANG}:${VERSION}${CHANNELTAG}"
+
+            DOCKERFILE="Dockerfile.${VERSION}${CHANNELTAG}"
+            if [ "${CHANNELTAG}" != "stable" ] && [ ! -f "$DOCKERFILE" ]; then
+                echo "$DOCKERFILE for channel ${CHANNELTAG} not found. Using stable version."
+                DOCKERFILE="Dockerfile.${VERSION}"
+            fi
+
+            if [ -f "${DOCKERFILE}" ]; then
+                bash $DIR/docker_helper.sh "${TENANT_DOCKER_ORG}/apps" "${LANG}${CHANNELTAG}" "${DOCKERFILE}" "${COMMAND}"
             else
-                echo "Dockerfile.${VERSION}${CHANNEL} not found. Skipped."
+                echo "${DOCKERFILE} not found. Skipped."
             fi
         done
         cd ${OWD}

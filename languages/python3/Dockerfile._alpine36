@@ -1,6 +1,13 @@
-from alpine:3.6
+FROM alpine:3.6
+
+ARG CHANNEL=stable
+ARG LANGUAGE=python2
+ARG BASE=alpine36
 
 RUN apk add --update alpine-sdk musl python python-dev py-pip && \
     rm /var/cache/apk/*
 
 RUN pip3 install --upgrade pip
+
+ADD requirements-${CHANNEL}.txt /requirements.txt
+RUN pip3 install --upgrade --no-cache-dir --upgrade -r /requirements.txt

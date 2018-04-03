@@ -1,45 +1,50 @@
-import reactors as Reactor
+from reactors.utils import Reactor, utcnow, agaveutils
+
 
 def main():
     """
     Exercise  utility features in Reactors base image
     """
+    r = Reactor()
 
-    print("## Important Reactor attributes")
-    print("UUID: {}".format(Reactor.uid))
-    print("Internal nickname: {}".format(Reactor.nickname))
-    print("Agave API username: {}".format(Reactor.username))
+    r.logger.info("# Reactor attributes")
 
-    print("## Show Reactor's filesystem paths")
-    print(Reactor.storage.paths)
+    r.logger.info("UUID: {}".format(r.uid))
+    r.logger.info("Reactor logging nickname: {}".format(r.nickname))
+    r.logger.info("API username: {}".format(r.username))
 
-    print("## Reactor's context")
-    print(Reactor.context)
+    # r.logger.info("# Reactor filesystem paths")
+    # r.logger.info(r.storage.paths)
 
-    print("## Fetch a value from the context")
-    print(Reactor.context.actor_dbid)
+    r.logger.info("# Reactor context")
+    r.logger.info(r.context)
 
-    print("## Show the Reactor's message.")
+    r.logger.info("# Actor database id")
+    r.logger.info(r.context.actor_dbid)
+
+    r.logger.info("# Reactor message")
     # If you are running this locally, try setting a MSG
     # environment variable to see it propagate into the
     # Reactor container environment
-    print(Reactor.context.raw_message)
+    r.logger.info(r.context.raw_message)
 
-    print("## Fetch a value for 'key1' from config.yml")
-    print(Reactor.settings.key1)
+    r.logger.info("# Value of 'key1' from settings")
+    r.logger.info(r.settings.key1)
 
-    print("## Demo the built-in logger")
-    Reactor.logger.info("Hello, world")
+    r.logger.info("# Demonstrate logger")
+    r.logger.info("Hello, world")
 
-    print("## Get a UTC Timestamp")
-    print(Reactor.utcnow())
+    r.logger.info("# UTC Timestamp")
+    r.logger.info(utcnow())
 
-    print("## Make an Agave call to the profiles API")
+    r.logger.info("# Call Agave profiles API")
     try:
-        print(Reactor.client.profiles.get())
+        r.logger.info(r.client.profiles.get())
     except Exception as e:
-        Reactor.logger.warn("Error calling Agave: {}".format(e))
+        r.logger.error("Error calling API: {}".format(e))
         pass
+
+    print(agaveutils.uri.to_agave_uri('data-sd2e-community', '/sample'))
 
 if __name__ == '__main__':
     main()

@@ -9,15 +9,16 @@ TENANT_ID := $(TENANT_KEY)
 TENANT_DOCKER_ORG := $(TENANT_DOCKER_ORG)
 PREFIX := $(HOME)
 
-BUILDS = base-build languages-build apps-build jupyter-build reactors-build
-IMAGES = base languages apps jupyter reactors
+BUILDS = base-build language-build apps-build jupyter-build reactors-build
+IMAGES = base language apps jupyter reactors
 
 .SILENT: test
-test:
-	echo "Not implemented"
 
 help:
-	echo "You can make base, languages, apps, reactors, clean"
+	echo "You can make base, language, apps, reactors, clean"
+
+all: images
+	true
 
 builds: $(BUILDS)
 	true
@@ -25,8 +26,8 @@ builds: $(BUILDS)
 images: $(IMAGES)
 	true
 
-all: images
-	true
+tests:
+	echo "Not implemented"
 
 base-build:
 	bash scripts/build_bases.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(BASE)
@@ -34,13 +35,13 @@ base-build:
 base: base-build
 	bash scripts/build_bases.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(BASE)
 
-languages-build:
+language-build:
 	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
 
-languages: languages-build
+language: language-build
 	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE) $(BASE)
 
-apps-build: languages-build
+apps-build: language-build
 	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
 
 apps: apps-build
@@ -52,7 +53,7 @@ jupyter-build: base-build
 jupyter: jupyter-build
 	bash scripts/build_jupyter.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release
 
-reactors-build: languages-build
+reactors-build:
 	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE)
 
 reactors: reactors-build

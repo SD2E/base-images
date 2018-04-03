@@ -25,6 +25,9 @@ buildopts="--rm=true "
 if [ ! -z "$NO_CACHE" ]; then
     buildopts="$buildopts --no-cache"
 fi
+if [ ! -z "$CHANNEL" ]; then
+    buildopts="$buildopts --no-cache --build-arg CHANNEL=${CHANNEL}"
+fi
 
 echo "Image: $IMAGE"
 echo "Tag: $TAG"
@@ -38,8 +41,8 @@ if [ $? -ne 0 ] ; then die "Error on build. Exiting." ; fi
 IMAGEID=`docker images -q  ${IMAGE}:${TAG}`
 if [ $? -ne 0 ] ; then die "Can't find image ${TENANT_DOCKER_ORG}/${IMAGE}:${TAG}. Exiting." ; fi
 
-docker tag ${IMAGEID} ${IMAGE}:latest
-if [ $? -ne 0 ] ; then die "Error tagging with 'latest'. Exiting." ; fi
+# docker tag ${IMAGEID} ${IMAGE}:latest
+# if [ $? -ne 0 ] ; then die "Error tagging with 'latest'. Exiting." ; fi
 
 fi
 

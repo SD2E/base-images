@@ -11,9 +11,11 @@ COMMAND=$3
 # optional
 DIST=$4
 
-CHANNEL=""
+CHANNEL="stable"
+CHANNELTAG=""
 if [ "${RELEASE}" != "stable" ]; then
-    CHANNEL="-${RELEASE}"
+    CHANNELTAG="-${RELEASE}"
+    CHANNEL="${RELEASE}"
 fi
 
 if [ ! -z "${DIST}" ]
@@ -33,11 +35,16 @@ OWD=${PWD}
 cd ${DIR}/../base
 for VERSION in ${DISTVERSIONS}
 do
-    if [ -f "Dockerfile.${VERSION}${CHANNEL}" ]; then
-        echo "Building ${TENANT_DOCKER_ORG}/base:${VERSION}${CHANNEL}"
-        bash ${DIR}/docker_helper.sh "${TENANT_DOCKER_ORG}/base" "${VERSION}${CHANNEL}" "Dockerfile.${VERSION}${CHANNEL}" "${COMMAND}"
+    DOCKERFILE="Dockerfile.${VERSION}${CHANNELTAG}"
+    if [ "${CHANNELTAG}" != "stable" ] && [ ! -f "$DOCKERFILE" ]; then
+        echo "$DOCKERFILE for channel ${CHANNELTAG} not found. Using stable version."
+        DOCKERFILE="Dockerfile.${VERSION}"
+    fi
+    if [ -f "${DOCKERFILE}" ]; then
+        echo "Building ${TENANT_DOCKER_ORG}/base:${VERSION}${CHANNELTAG}"
+        bash ${DIR}/docker_helper.sh "${TENANT_DOCKER_ORG}/base" "${VERSION}${CHANNELTAG}" "${DOCKERFILE}" "${COMMAND}"
     else
-        echo "Dockerfile.${VERSION}${CHANNEL} not found. Skipped."
+        echo "${DOCKERFILE} not found. Skipped."
     fi
 done
 cd ${OWD}

@@ -8,3 +8,4 @@ petname>=2.2
 python-jsonschema-objects==0.3.1
 pytz>=2017.2
 urllib3>=1.22
+tacconfig>=0.5.0
