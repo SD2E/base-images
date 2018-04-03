@@ -6,6 +6,7 @@ ARG LANGUAGE=python3
 ARG BASE=ubuntu18
 
 ARG AGAVEPY_BRANCH=develop
+ARG PYTHON_PIP_VERSION=9.0.3
 
 RUN apt-get -y update && \
     apt-get -y install build-essential \
@@ -18,7 +19,7 @@ RUN apt-get -y update && \
                        libffi-dev  && \
     apt-get clean
 
-RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade pip==${PYTHON_PIP_VERSION}
 RUN pip3 install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 ADD requirements-${CHANNEL}.txt /requirements.txt

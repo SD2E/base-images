@@ -6,6 +6,7 @@ ARG LANGUAGE=python2
 ARG BASE=ubuntu14
 
 ARG AGAVEPY_BRANCH=develop
+ARG PYTHON_PIP_VERSION=9.0.3
 
 RUN apt-get -y update && \
     apt-get -y install build-essential \
@@ -17,7 +18,7 @@ RUN apt-get -y update && \
     apt-get clean
 
 # setuptools is key - otherwise cryptography>=1.9 has abandoned Py < 3!
-RUN pip install --upgrade pip setuptools
+RUN pip install --upgrade pip==${PYTHON_PIP_VERSION} setuptools
 # Installing pyOpenSSL has to happen *after* updating setuptools
 RUN pip install --upgrade pyOpenSSL
 # Now, we can install AgavePy and other HTTPS-intensive modules under Ubu14/Py2

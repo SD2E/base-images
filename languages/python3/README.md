@@ -4,7 +4,7 @@ Operating System: Language-specific images are based on sd2e/base:<os>
 
 ## Dependency management
 
-Dependency management is via pip > 9.0.1. The image also supports `virtualenv`.
+Dependency management is via pip. The image also supports `virtualenv`.
 
 ## Docker specifics
 
@@ -23,6 +23,15 @@ cache when building.
 
 `BASE`, `LANGUAGE` and `CHANNEL` are passed into `docker build` as build-time
 arguments, as all `base-images` Dockerfiles contain these as `ARG` entries.
+
+### Special
+
+One can pass a value for these variables and they'll inform the build process.
+
+`AGAVEPY_BRANCH` - Default is currently `develop`
+`PYTHON_PIP_VERSION` - Default is currently `9.0.3`
+`NO_CACHE` - Rebuild everything without the Docker cache. Default is unset.
+`CHANNEL` - Default is `stable`. Repositories are configured to explicitly also support `edge`
 
 ### Additional files
 

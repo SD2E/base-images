@@ -9,13 +9,13 @@ TENANT_ID := $(TENANT_KEY)
 TENANT_DOCKER_ORG := $(TENANT_DOCKER_ORG)
 PREFIX := $(HOME)
 
-BUILDS = base-build language-build apps-build jupyter-build reactors-build
-IMAGES = base language apps jupyter reactors
+BUILDS = base-build languages-build apps-build jupyter-build reactors-build
+IMAGES = base languages reactors apps
 
 .SILENT: test
 
 help:
-	echo "You can make base, language, apps, reactors, clean"
+	echo "You can make base, languages, apps, reactors, clean"
 
 all: images
 	true
@@ -35,13 +35,13 @@ base-build:
 base: base-build
 	bash scripts/build_bases.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(BASE)
 
-language-build:
+languages-build:
 	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
 
-language: language-build
+languages: languages-build
 	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE) $(BASE)
 
-apps-build: language-build
+apps-build: languages-build
 	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
 
 apps: apps-build

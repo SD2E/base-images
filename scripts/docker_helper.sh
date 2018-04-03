@@ -21,8 +21,11 @@ if [ $? -ne 0 ] ; then die "Docker not found or unreachable. Exiting." ; fi
 if [[ "$COMMAND" == 'build' ]];
 then
 
-buildopts="--rm=true "
-if [ ! -z "$NO_CACHE" ]; then
+buildopts=""
+if [ "$NO_REMOVE" == 1 ]; then
+    buildopts="$buildopts --rm=false"
+fi
+if [ "$NO_CACHE" == 1 ]; then
     buildopts="$buildopts --no-cache"
 fi
 if [ ! -z "$CHANNEL" ]; then

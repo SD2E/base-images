@@ -7,3 +7,5 @@ CHANNEL=stable
 MAKE_OBJ=reactors
 # Docker
 TENANT_DOCKER_ORG=sd2e
+PYTHON_PIP_VERSION=9.0.3
+AGAVEPY_BRANCH=develop

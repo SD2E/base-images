@@ -4,10 +4,13 @@ ARG CHANNEL=stable
 ARG LANGUAGE=python2
 ARG BASE=alpine36
 
+ARG AGAVEPY_BRANCH=develop
+ARG PYTHON_PIP_VERSION=9.0.3
+
 RUN apk add --update alpine-sdk musl python python-dev py-pip && \
     rm /var/cache/apk/*
 
-RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade pip==${PYTHON_PIP_VERSION}
 
 ADD requirements-${CHANNEL}.txt /requirements.txt
 RUN pip3 install --upgrade --no-cache-dir --upgrade -r /requirements.txt

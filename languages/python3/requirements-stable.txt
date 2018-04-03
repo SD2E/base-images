@@ -1,0 +1,14 @@
+# test frameworks
+pytest==3.5.0
+flake8==3.5.0
+# fuzzing
+hypothesis==3.53.0
+faker==0.8.12
+# environments
+tox==2.9.1
+# schemas
+jsonschema==2.6.0
+lollipop==1.1.6
+# docs
+sphinx==1.6.3
+recommonmark==0.4.0
