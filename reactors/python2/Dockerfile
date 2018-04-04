@@ -1,4 +1,4 @@
-FROM sd2e/python2:ubuntu16-edge
+FROM sd2e/python2:ubuntu16
 
 ARG CHANNEL=stable
 ARG LANGUAGE=python2

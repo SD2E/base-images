@@ -18,7 +18,7 @@ RUN apt-get -y update && \
     apt-get clean
 
 RUN pip install --upgrade pip==${PYTHON_PIP_VERSION}
-RUN pip install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@develop
+RUN pip install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 ADD requirements-${CHANNEL}.txt /requirements.txt
 RUN pip install --upgrade --no-cache-dir --upgrade -r /requirements.txt

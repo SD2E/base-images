@@ -1,6 +1,7 @@
 # test frameworks
 pytest==3.5.0
 flake8==3.5.0
+pytest-flake8==1.0.0
 # fuzzing
 hypothesis==3.53.0
 faker==0.8.12
