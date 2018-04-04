@@ -1,59 +1,57 @@
-# Reactor Base
+# Reactors::Python2
 
-This is not the objective for an elite strike force of Space 
-Marines who need to disable the planetary shields so that
-the invasion can begin. Instead, it is the source repository
-for the Python2 base image for TACC Reactors. 
+A base image for building Python2-based [Abaco][1] Reactors.
 
-You do not need to build it yourself, as it is available in
-TACC's Docker Cloud Registry.
+* [DockerHub][]
+    * Stable: `sd2e/reactors:python2`
+    * Pre-release: `sd2e/reactors:python2-edge`
 
-Stable: `taccreactors/reactor-python2:stable`
-Pre-release: `taccreactors/reactor-python2:testing`
-Experimental: `taccreactors/reactor-python2:edge`
+## Features
 
-## Libraries
+### TACC.cloud API Integration
 
-This image provides helpful utlity libraries and utilities
-for you to use in your Python-based Reactors. It is likely
-that more basic functionality will be added to this image 
-in the future, but we will try hard to maintain full backward
-compatibility. Also, you should be aware that anything 
-these libaries do can be accomplished manually. We are simply
-trying to reduce the amount of boilerplate needed to deploy
-functions-as-a-service at TACC.
+When deployed, a Reactor is automatically configured with valid user-specific
+credentials for using TACC.cloud APIs. These currently include the Agave and
+Abaco APIs, but will soon also include TACC's hosted GitLab,
+Continuous Integration, and Container Registry services.
 
-Presently, the following community-maintained modules are
-installed in the base image:
-* [agavepy][1]
-* [jmespath][3]
-* [jsonschema][4]
-* [PyYAML][5]
+### Filesystems
 
-There is also a custom module called [config][2] that 
-provides drop-dead simple file-based configuration capability
-for your Reactors.  
+Abaco-deployed containers are deployed read-only, but have a few options to write data:
 
-## ONBUILD
+1. The `/mnt/ephemeral-01`, which is the default container working directory, is writable but is temporary to the current execution
+2. Project storage is accessible via the path defined by `_PROJ_STOCKYARD`
+3. Project archival storage is accessible via the path defined by `_PROJ_CORRAL`
 
-Because Reactors are based on Docker container images, we are able
-to take advantage of many features of the Docker ecosystem. Specifically,
-we use ONBUILD support in this base image. When you deploy a Reactor
-derived `FROM taccreactors/python2` it will do the following:
+### ONBUILD support
+
+When an image is built using this image, either manually or as part of the
+`abaco deploy` workflow, it will automatically do the following via [ONBUILD][3]:
 
 1. Copy in `requirements.txt`
-2. Run `pip install -r requirements.txt`
-3. Copy in `reactor.py`
-4. Copy in `config.yml`
-5. Copy in `message.json` 
-6. Set the default command for the image to `python reactor.py`
+2. Run `pip install --upgrade -r requirements.txt`
+3. Copy in `reactor.py`, `config.yml`, and `message.jsonschema` to the container root directory
+4. Set the default command to `python reactor.py`
 
-Furthemore, in the Reactor runtime hosted in the TACC Cloud, your
-Reactors will automatically be configured with an active Agave API 
-client owned by your TACC identity. 
+### Python libraries
 
-[1]: agave
-[2]: config
-[3]: jmespath.py
-[4]: jsonschema
-[5]: PyYAML
+In addition those Python modules supplied by its source image
+[sd2e/python2:ubuntu17][4], this image features the `reactors` utility module
+to help reduce the boilerplate of working with TACC.cloud APIs and performing
+other routine tasks.
+
+* [agavepy][5]
+* [agavedb][6]
+* [taccconfig][7]
+* [jmespath][8]
+* [jsonschema][9]
+
+[1]: https://useabaco.cloud/
+[2]: https://cloud.docker.com/swarm/sd2e/repository/docker/sd2e/reactors/
+[3]: https://docs.docker.com/engine/reference/builder/#onbuild
+[4]: TBD
+[5]: https://pypi.python.org/pypi/agavepy/
+[6]: https://pypi.python.org/pypi/agavedb/
+[7]: https://pypi.python.org/pypi/tacconfig/
+[8]: https://pypi.python.org/pypi/jmespath/
+[9]: https://pypi.python.org/pypi/jsonschema/

@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.append(os.path.split(os.getcwd())[0])
 print("sys_path: {}".format(sys.path))
 # sys.path.append('/reactors')
-from reactors import logs, storage, uniqueid, agaveutils
+from reactors import aliases, logs, storage, uniqueid, agaveutils
 
 
 VERSION = '0.6.0'
@@ -95,6 +95,10 @@ class Reactor(object):
         self.uid = self.context.get('actor_id')
         self.execid = self.context.get('execution_id')
         self.state = self.context.get('state')
+        self.local = False
+        if os.environ.get('LOCALONLY', 0) == 1:
+            self.local = True
+
         try:
             self.username = self.client.username.encode("utf-8", "strict")
         except Exception:
@@ -122,6 +126,17 @@ class Reactor(object):
                                       self.execid,
                                       log_level=log_level,
                                       log_file=log_file)
+
+    def on_success(self, successMessage="Success"):
+        '''Log message and exit 0'''
+        self.logger.info(successMessage)
+        sys.exit(0)
+
+    def on_failure(self, failMessage="Failure", exceptionObject=None):
+        '''Log message and exception and exit 1'''
+        self.logger.critical("{} : {}".format(
+            failMessage, exceptionObject))
+        sys.exit(1)
 
     @classmethod
     def get_client_with_mock_support():

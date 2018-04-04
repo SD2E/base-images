@@ -47,15 +47,22 @@ to developers and researchers relying on them.
 
 ## Container image types
 
-There are three classes of image currently supported:
+Four image types are currently supported:
 
 * base : foundation layer for other images
 * language : images configured to support development in a specific language
 * apps : extension of the language environment supporting Agave apps
 * reactors : extension of the language environment supporting Reactors
 
-Two more are coming soon:
+Coming soon:
 * jupyterhub-user : shared infrastructure for container and HPC Jupyter
+
+### Documentation
+
+* [base](base/README.md)
+* [languages](languages/README.md)
+* [reactors](reactors/README.md)
+* [apps](apps/README.md)
 
 ## Building
 
@@ -78,13 +85,27 @@ Development is Makefile-driven, with parameterization via build variables.
 | specific language + base | make [apps,reactors]-(build) | see above                                 | LANGUAGE=<lang> BASE=<dist> |
 ```
 
-You can also set `NO_CACHE=1` to force a completely fresh build.
-
 For example, the following command builds, but doesn't push, the `python2`
 language image based on `ubuntu16` using `Dockerfile-edge`.
 
 ```shell
 make languages-build LANGUAGE=python2 BASE=ubuntu16 CHANNEL=edge
+```
+
+### Special variables
+
+Values passed to these variables inform the build process:
+
+`AGAVEPY_BRANCH` - AgavePy code branch [develop]
+`PYTHON_PIP_VERSION` - Version of pip installed in Python images [9.0.3]
+`NO_CACHE` - Rebuild everything without the Docker cache. [0]
+`NO_REMOVE` - Don't remove intermediate containers (helpful for debugging). [0]
+`CHANNEL` - Default is [stable]. Repositories explicitly also support `edge`
+
+Example: Build Python2 based on Pip 9.0.1 and don't remove intermediates.
+
+```shell
+make languages-build LANGUAGE=python2 PYTHON_PIP_VERSION=9.0.1 NO_REMOVE=1
 ```
 
 ## Testing

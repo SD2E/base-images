@@ -1,6 +1,12 @@
-# Languages:Python3
+# Languages::Python3
 
-Operating System: Language-specific images are based on sd2e/base:<os>
+Base images tailored to building Python3-based containers. Language images
+are available and supported for alpine36, ubuntu16, ubuntu17 operating system
+bases. Older versions (ubuntu14) and pre-release versions (ubuntu18) are
+available but not yet officially supported. All language images have a stable
+and `-edge` release channel.
+
+The Python3 Apps and Reactors images are built using the 'ubuntu17' tag.
 
 ## Dependency management
 
@@ -28,10 +34,11 @@ arguments, as all `base-images` Dockerfiles contain these as `ARG` entries.
 
 One can pass a value for these variables and they'll inform the build process.
 
-`AGAVEPY_BRANCH` - Default is currently `develop`
-`PYTHON_PIP_VERSION` - Default is currently `9.0.3`
-`NO_CACHE` - Rebuild everything without the Docker cache. Default is unset.
-`CHANNEL` - Default is `stable`. Repositories are configured to explicitly also support `edge`
+`AGAVEPY_BRANCH` - AgavePy code branch [develop]
+`PYTHON_PIP_VERSION` - Version of pip installed in Python images [9.0.3]
+`NO_CACHE` - Rebuild everything without the Docker cache. [0]
+`NO_REMOVE` - Don't remove intermediate containers (helpful for debugging). [0]
+`CHANNEL` - Default is [stable]. Repositories explicitly also support `edge`
 
 ### Additional files
 

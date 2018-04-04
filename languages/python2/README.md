@@ -1,6 +1,12 @@
 # Languages:Python2
 
-Operating System: Language-specific images are based on sd2e/base:<os>
+Base images tailored to building Python2-based containers. Language images
+are available and supported for alpine36, ubuntu16, ubuntu17 operating system
+bases. Older versions (ubuntu14) and pre-release versions (ubuntu18) are
+available but not yet officially supported. All language images have a stable
+and `-edge` release channel.
+
+The Python2 Apps and Reactors images are built using the 'ubuntu17' tag.
 
 ## Dependency management
 
