@@ -3,23 +3,29 @@ sudo: required
 services:
   - docker
 
-jobs:
+matrix:
   include:
     - # master builds and deploys stable
       if: branch = master
-      env: CHANNEL=stable
-    - # develop builds and deploys edge
+      env:
+        global:
+          - TRAVIS_GLOBAL=stable
+        matrix:
+          - CHANNEL=stable LANGUAGE=python2 BASE=ubuntu16
+          - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu16
+          - CHANNEL=stable LANGUAGE=python2 BASE=ubuntu17
+          - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu17    - # develop builds and deploys edge
       if: branch = develop
-      env: CHANNEL=edge
+      env:
+          - TRAVIS_GLOBAL=edge
+          - NO_CACHE=1
+        matrix:
+          - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu16
+          - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu16
+          - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu17
+          - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu17
 
 env:
-  matrix:
-    - LANGUAGE=python2 BASE=ubuntu16
-    - LANGUAGE=python3 BASE=ubuntu16
-    - LANGUAGE=python2 BASE=ubuntu17
-    - LANGUAGE=python3 BASE=ubuntu17
-    - LANGUAGE=java8 BASE=ubuntu17
-
   global:
     - REGISTRY_ORG=sd2e
     - REGISTRY_USER=sd2etest
