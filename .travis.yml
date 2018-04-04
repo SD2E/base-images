@@ -9,29 +9,30 @@ matrix:
       if: branch = develop
       env:
         global:
-          - TRAVIS_GLOBAL=edge
+          - CHANNEL=edge
+          - NO_CACHE=1
         matrix:
-          - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu16
-          - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu16
-          - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu17
-          - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu17
+          - LANGUAGE=python2 BASE=ubuntu16
+          - LANGUAGE=python3 BASE=ubuntu16
+          - LANGUAGE=python2 BASE=ubuntu17
+          - LANGUAGE=python3 BASE=ubuntu17
     - # master builds and deploys stable
       if: branch = master
       env:
         global:
-          - TRAVIS_GLOBAL=stable
+          - CHANNEL=stable
+          - NO_CACHE=1
         matrix:
-          - CHANNEL=stable LANGUAGE=python2 BASE=ubuntu16
-          - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu16
-          - CHANNEL=stable LANGUAGE=python2 BASE=ubuntu17
-          - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu17
+          - LANGUAGE=python2 BASE=ubuntu16
+          - LANGUAGE=python3 BASE=ubuntu16
+          - LANGUAGE=python2 BASE=ubuntu17
+          - LANGUAGE=python3 BASE=ubuntu17
 
 env:
   global:
     - REGISTRY_ORG=sd2e
     - REGISTRY_USER=sd2etest
-    - NO_CACHE=1
-    # REGISTRY_PASS=...
+
 
 script:
   - make base-build CHANNEL=$CHANNEL BASE=$BASE NO_CACHE=$NO_CACHE
