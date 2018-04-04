@@ -5,6 +5,16 @@ services:
 
 matrix:
   include:
+    - # develop builds and deploys edge
+      if: branch = develop
+      env:
+        global:
+          - TRAVIS_GLOBAL=edge
+        matrix:
+          - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu16
+          - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu16
+          - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu17
+          - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu17
     - # master builds and deploys stable
       if: branch = master
       env:
@@ -14,16 +24,7 @@ matrix:
           - CHANNEL=stable LANGUAGE=python2 BASE=ubuntu16
           - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu16
           - CHANNEL=stable LANGUAGE=python2 BASE=ubuntu17
-          - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu17    - # develop builds and deploys edge
-      if: branch = develop
-      env:
-          - TRAVIS_GLOBAL=edge
-          - NO_CACHE=1
-        matrix:
-          - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu16
-          - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu16
-          - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu17
-          - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu17
+          - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu17
 
 env:
   global:
