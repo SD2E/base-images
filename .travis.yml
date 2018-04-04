@@ -8,21 +8,21 @@ matrix:
     - # develop builds and deploys edge
       if: branch = develop
       env:
-          - CHANNEL=edge
-        matrix:
-          - LANGUAGE=python2 BASE=ubuntu16
-          - LANGUAGE=python3 BASE=ubuntu16
-          - LANGUAGE=python2 BASE=ubuntu17
-          - LANGUAGE=python3 BASE=ubuntu17
+        - CHANNEL=edge
+      matrix:
+        - LANGUAGE=python2 BASE=ubuntu16
+        - LANGUAGE=python3 BASE=ubuntu16
+        - LANGUAGE=python2 BASE=ubuntu17
+        - LANGUAGE=python3 BASE=ubuntu17
     - # master builds and deploys stable
       if: branch = master
       env:
-          - CHANNEL=stable
-        matrix:
-          - LANGUAGE=python2 BASE=ubuntu16
-          - LANGUAGE=python3 BASE=ubuntu16
-          - LANGUAGE=python2 BASE=ubuntu17
-          - LANGUAGE=python3 BASE=ubuntu17
+        - CHANNEL=stable
+      matrix:
+        - LANGUAGE=python2 BASE=ubuntu16
+        - LANGUAGE=python3 BASE=ubuntu16
+        - LANGUAGE=python2 BASE=ubuntu17
+        - LANGUAGE=python3 BASE=ubuntu17
 
 env:
   global:
