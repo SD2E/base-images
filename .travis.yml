@@ -1,16 +1,25 @@
 sudo: required
+
 services:
   - docker
+
+jobs:
+  include:
+    - # master builds and deploys stable
+      if: branch = master
+      env: CHANNEL=stable
+    - # develop builds and deploys edge
+      if: branch = develop
+      env: CHANNEL=edge
+
 env:
   matrix:
-    - CHANNEL=stable LANGUAGE=python2 BASE=ubuntu16
-    - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu16
-    - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu16
-    - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu16
-    - CHANNEL=stable LANGUAGE=python2 BASE=ubuntu17
-    - CHANNEL=edge LANGUAGE=python2 BASE=ubuntu17
-    - CHANNEL=stable LANGUAGE=python3 BASE=ubuntu17
-    - CHANNEL=edge LANGUAGE=python3 BASE=ubuntu17
+    - LANGUAGE=python2 BASE=ubuntu16
+    - LANGUAGE=python3 BASE=ubuntu16
+    - LANGUAGE=python2 BASE=ubuntu17
+    - LANGUAGE=python3 BASE=ubuntu17
+    - LANGUAGE=java8 BASE=ubuntu17
+
   global:
     - REGISTRY_ORG=sd2e
     - REGISTRY_USER=sd2etest
