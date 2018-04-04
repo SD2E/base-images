@@ -8,9 +8,7 @@ matrix:
     - # develop builds and deploys edge
       if: branch = develop
       env:
-        global:
           - CHANNEL=edge
-          - NO_CACHE=1
         matrix:
           - LANGUAGE=python2 BASE=ubuntu16
           - LANGUAGE=python3 BASE=ubuntu16
@@ -19,9 +17,7 @@ matrix:
     - # master builds and deploys stable
       if: branch = master
       env:
-        global:
           - CHANNEL=stable
-          - NO_CACHE=1
         matrix:
           - LANGUAGE=python2 BASE=ubuntu16
           - LANGUAGE=python3 BASE=ubuntu16
@@ -32,7 +28,7 @@ env:
   global:
     - REGISTRY_ORG=sd2e
     - REGISTRY_USER=sd2etest
-
+    - NO_CACHE=1
 
 script:
   - make base-build CHANNEL=$CHANNEL BASE=$BASE NO_CACHE=$NO_CACHE
