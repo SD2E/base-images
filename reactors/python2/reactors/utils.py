@@ -18,14 +18,15 @@ from tacconfig import config
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 sys.path.append(os.path.split(os.getcwd())[0])
-print("sys_path: {}".format(sys.path))
+# print("sys_path: {}".format(sys.path))
 # sys.path.append('/reactors')
 from reactors import aliases, logs, storage, uniqueid, agaveutils
 
 
-VERSION = '0.6.0'
+VERSION = '0.6.1'
 LOG_LEVEL = 'ERROR'
 LOG_FILE = None
+NAMESPACE = '_REACTOR'
 
 # client = None
 # context = None
@@ -104,9 +105,20 @@ class Reactor(object):
         except Exception:
             self.username = 'unknown'
             pass
-        # settings-specific behaviors
-        self.settings = config.read_config(namespace='_REACTOR')
-        # logging level
+
+        # bootstrap configuration via tacconfig module
+        self.settings = config.read_config(namespace=NAMESPACE)
+        # list of text strings to redact in all logs - in this case, all
+        # variables passed in as env overrides since we assume those are
+        # intended to be secret (or at least not easily discoverable).
+        try:
+            envstrings = config.get_env_config_vals(namespace=NAMESPACE)
+        except Exception:
+            envstrings = []
+
+        # Set up logging
+        #
+        # Get logging level
         log_level = LOG_LEVEL
         try:
             _log_level = self.settings.get('logs').get('level')
@@ -114,7 +126,7 @@ class Reactor(object):
                 log_level = _log_level
         except Exception:
             pass
-        # optional log file (relative to cwd())
+        # Optional log file (relative to cwd())
         log_file = LOG_FILE
         try:
             _log_file = self.settings.get('logs').get('file')
@@ -122,10 +134,13 @@ class Reactor(object):
                 log_file = _log_file
         except Exception:
             pass
+        # Use 'redactions' from above to define a banlist of strings
+        #   These will be replaced with * characters in all logs
         self.logger = logs.get_logger(self.uid,
                                       self.execid,
                                       log_level=log_level,
-                                      log_file=log_file)
+                                      log_file=log_file,
+                                      redactions=envstrings)
 
     def on_success(self, successMessage="Success"):
         '''Log message and exit 0'''
