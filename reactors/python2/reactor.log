@@ -1,2 +1,0 @@
-2018-04-07T23:45:11Z [DEBUG] VGO0r8Mb5L044:m9o774w6VZyl3 - AttrDict({'redact': '*****', 'logs': {'file': 'reactor.log', 'level': 'DEBUG'}, 'key1': 'value1'})
-2018-04-07T23:45:58Z [DEBUG] 5mOyEAOlW3w2P:V92Bb39yV6v0v - AttrDict({'logs': {'file': 'reactor.log', 'level': 'DEBUG'}, 'key1': 'value1', 'noredact': 'Hello there, insenstive data.', 'redact': '*****'})
