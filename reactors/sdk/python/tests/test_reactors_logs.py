@@ -1,0 +1,41 @@
+import os
+import sys
+HERE = os.path.dirname(os.path.abspath(__file__))
+PARENT = os.path.dirname(HERE)
+sys.path.insert(0, PARENT)
+sys.path.append('/reactors')
+import pytest
+from reactors.utils import Reactor
+
+
+def test_logger_stderr(caplog, capsys):
+    '''Verify logging to stderr works'''
+    message = 'Hello'
+    r = Reactor()
+    r.logger.info(message)
+    out, err = capsys.readouterr()
+    assert [message] == [rec.message for rec in caplog.records]
+    assert message in err
+    assert message not in out
+
+
+def test_logger_logfile(monkeypatch):
+    '''Verify that message is written to a file'''
+    monkeypatch.setenv('_REACTOR_LOGS_FILE', 'testing.log')
+    message = 'Hola'
+    r = Reactor()
+    r.logger.info(message)
+    file = open('testing.log', 'r')
+    assert message in file.read()
+    os.remove('testing.log')
+
+
+def test_redact(caplog, capsys, monkeypatch):
+    '''Verify that the text of an override value cannot be logged'''
+    monkeypatch.setenv('_REACTOR_REDACT', 'VewyVewySekwit')
+    r = Reactor()
+    r.logger.debug(r.settings)
+    out, err = capsys.readouterr()
+    assert 'VewyVewySekwit' in caplog.text
+    assert 'VewyVewySekwit' not in err
+    assert 'VewyVewySekwit' not in out

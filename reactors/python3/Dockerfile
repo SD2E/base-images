@@ -1,4 +1,4 @@
-FROM sd2e/python3:ubuntu17
+FROM sd2e/python3:ubuntu17-edge
 
 ARG CHANNEL=edge
 ARG LANGUAGE=python3
@@ -33,7 +33,7 @@ RUN pip3 install --upgrade git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRA
 # In-progress language libraries
 
 ADD reactors /reactors
-ADD agaveutils /agaveutils
+# ADD agaveutils /agaveutils
 
 # Default actor and config files
 ADD reactor.py /
