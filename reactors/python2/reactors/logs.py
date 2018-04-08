@@ -41,15 +41,9 @@ def get_log_file(name):
 
 class RedactingFormatter(object):
     """Specialized formatter used to sanitize log messages"""
-    def __init__(self, orig_formatter, patterns=[]):
+    def __init__(self, orig_formatter, patterns):
         self.orig_formatter = orig_formatter
-        filtered_patterns = []
-        for p in patterns:
-            # we're not getting into the business of
-            # replacing anything but legitimate strings
-            if isinstance(p, str):
-                filtered_patterns.append(p)
-        self._patterns = filtered_patterns
+        self._patterns = patterns
 
     def format(self, record):
         msg = self.orig_formatter.format(record)
