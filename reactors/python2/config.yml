@@ -7,3 +7,4 @@ noredact: 'Hello there, insenstive data.'
 logs:
   level: 'DEBUG'
   file: 'reactor.log'
+  token: ~
