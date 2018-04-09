@@ -29,13 +29,17 @@ def test_init():
     assert isinstance(r.logger, Logger)
 
 
-# def test_localonly(monkeypatch):
-#     '''Check LOCALONLY x Reactor.local behavior'''
-#     monkeypatch.setenv('LOCALONLY', 1)
-#     r = Reactor()
-#     rlocal = r.local
-#     assert rlocal is True
-    # monkeypatch.setenv('LOCALONLY', 0)
-    # p = Reactor()
-    # plocal = p.local
-    # assert plocal is False
+def test_localonly_true(monkeypatch):
+    '''Check LOCALONLY x Reactor.local set -> True'''
+    monkeypatch.setenv('LOCALONLY', 1)
+    r = Reactor()
+    rlocal = r.local
+    assert rlocal is True
+
+
+def test_localonly_false(monkeypatch):
+    '''Check LOCALONLY x Reactor.local unset -> False'''
+    monkeypatch.setenv('LOCALONLY', None)
+    r = Reactor()
+    rlocal = r.local
+    assert rlocal is False

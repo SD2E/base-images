@@ -97,9 +97,12 @@ class Reactor(object):
         self.uid = self.context.get('actor_id')
         self.execid = self.context.get('execution_id')
         self.state = self.context.get('state')
-        self.local = False
-        if os.environ.get('LOCALONLY', 0) == 1:
+
+        localonly = str(os.environ.get('LOCALONLY', 0))
+        if localonly == '1':
             self.local = True
+        else:
+            self.local = False
 
         try:
             self.username = self.client.username.encode("utf-8", "strict")
@@ -109,6 +112,7 @@ class Reactor(object):
 
         # bootstrap configuration via tacconfig module
         self.settings = config.read_config(namespace=NAMESPACE)
+
         # list of text strings to redact in all logs - in this case, all
         # variables passed in as env overrides since we assume those are
         # intended to be secret (or at least not easily discoverable).
@@ -116,6 +120,9 @@ class Reactor(object):
             envstrings = config.get_env_config_vals(namespace=NAMESPACE)
         except Exception:
             envstrings = []
+
+        # add in nonce to the redact list via some heuristic measures
+        envstrings.extend(self.get_nonce_vals())
 
         # Set up logging
         #
@@ -198,6 +205,17 @@ class Reactor(object):
             # Merge new values from __context
             _context.update(__context)
         return _context
+
+    def get_nonce_vals(self):
+        '''Fetch x-nonce if it was passed'''
+        nonce_vals = []
+        try:
+            nonce_value = self.context.get('x-nonce', None)
+            if nonce_value is not None:
+                nonce_vals.append(nonce_value)
+        except Exception:
+            pass
+        return nonce_vals
 
 
 def utcnow():

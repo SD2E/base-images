@@ -52,3 +52,15 @@ def test_read_token_env(monkeypatch):
     monkeypatch.setenv('_REACTOR_LOGS_TOKEN', 'VewyVewySekwit')
     r = Reactor()
     assert r.settings.logs.token == 'VewyVewySekwit'
+
+
+def test_redact_nonce(caplog, capsys, monkeypatch):
+    '''Verify that x-nonce is redacted since it is an impersonation token'''
+    message = 'VewyVewySekwit'
+    monkeypatch.setenv('x-nonce', message)
+    r = Reactor()
+    r.logger.debug(r.context)
+    out, err = capsys.readouterr()
+    assert message in caplog.text
+    assert message not in err
+    assert message not in out

@@ -45,7 +45,8 @@ ONBUILD ADD requirements.txt /tmp/requirements.txt
 ONBUILD RUN pip3 install --upgrade -r /tmp/requirements.txt
 ONBUILD ADD reactor.py /
 ONBUILD ADD config.yml /
-ONBUILD ADD message.jsonschema /message.jsonschema
+# Allow for message.json and message.jsonschema as both are valid extensions
+ONBUILD ADD message.json* /message.jsonschema
 
 # Close out making absolutely sure that work directory is set
 WORKDIR ${SCRATCH}

@@ -67,7 +67,7 @@ if [ -d "${AGAVE_CREDS}" ]; then
 fi
 
 envopts=""
-if ((REACTOR_LOCAL)); then
+if ((REACTOR_LOCAL)) && ((! UNDER_CI)) ; then
     envopts="${envopts} -e LOCALONLY=1"
 fi
 
