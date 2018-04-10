@@ -125,7 +125,7 @@ class Reactor(object):
             envstrings = []
 
         # add in nonce to the redact list via some heuristic measures
-        envstrings.extend(self.get_nonce_vals())
+        envstrings.extend(self._get_nonce_vals())
 
         # Set up logging
         #
@@ -209,8 +209,8 @@ class Reactor(object):
             _context.update(__context)
         return _context
 
-    def get_nonce_vals(self):
-        '''Fetch x-nonce if it was passed'''
+    def _get_nonce_vals(self):
+        '''Fetch x-nonce if it was passed. Used to set up redaction.'''
         nonce_vals = []
         try:
             nonce_value = self.context.get('x-nonce', None)
@@ -225,15 +225,14 @@ class Reactor(object):
                          messageschema=MESSAGE_SCHEMA,
                          permissive=True):
         """
-        Validate JSON string against a JSON schema
+        Validate dictonary derived from JSON against a JSON schema
 
         Positional arguments:
-        self
-        messageJSON - str - JSON text
+        messagedict - dict - JSON-derived object
 
         Keyword arguments:
-        schema_file - str - path to the requisite JSON schema file
-        permissive - bool - swallow validation errors [False]
+        messageschema - str - path to the requisite JSON schema file
+        permissive - bool - swallow validation errors [True]
         """
         return jsonmessages.validate_message(messagedict,
                                              messageschema=MESSAGE_SCHEMA,

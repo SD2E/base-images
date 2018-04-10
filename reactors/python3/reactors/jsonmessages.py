@@ -9,7 +9,7 @@ ROOT = '/'
 MESSAGE_SCHEMA = '/message.jsonschema'
 
 
-def validate_return_bool(object_json, schema_json, permissive=True):
+def _validate_return_bool(object_json, schema_json, permissive=True):
 
         class formatChecker(FormatChecker):
             def __init__(self):
@@ -29,14 +29,14 @@ def validate_message(messagedict,
                      messageschema=MESSAGE_SCHEMA,
                      permissive=True):
     """
-    Validate JSON string against a JSON schema
+    Validate dictonary derived from JSON string against a schema
 
     Positional arguments:
-    messageJSON - str - JSON text
+    messagedict - dict - JSON-derived object
 
     Keyword arguments:
-    schema_file - str - path to the requisite JSON schema file
-    permissive - bool - swallow validation errors [False]
+    messageschema - str - path to the requisite JSON schema file
+    permissive - bool - swallow validation errors [True]
     """
     try:
         with open(messageschema) as schema:
@@ -47,6 +47,6 @@ def validate_message(messagedict,
         else:
             return False
 
-    return validate_return_bool(messagedict,
-                                schema_json,
-                                permissive=permissive)
+    return _validate_return_bool(messagedict,
+                                 schema_json,
+                                 permissive=permissive)
