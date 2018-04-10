@@ -3,6 +3,7 @@ Utility library for building TACC Reactors
 """
 from __future__ import absolute_import
 
+import json
 import os
 import sys
 import petname
@@ -12,6 +13,7 @@ import datetime
 from attrdict import AttrDict
 from agavepy.actors import get_context
 from agavepy.actors import get_client
+
 # config library - replaces legacy config.py
 from tacconfig import config
 
@@ -20,7 +22,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.append(os.path.split(os.getcwd())[0])
 # print("sys_path: {}".format(sys.path))
 # sys.path.append('/reactors')
-from reactors import aliases, logs, storage, uniqueid, agaveutils
+from reactors import agaveutils, aliases, logs, jsonmessages, storage, uniqueid
 
 
 VERSION = '0.6.1'
@@ -28,6 +30,7 @@ LOG_LEVEL = 'ERROR'
 LOG_FILE = None
 NAMESPACE = '_REACTOR'
 HASH_SALT = '97JFXMGWBDaFWt8a4d9NJR7z3erNcAve'
+MESSAGE_SCHEMA = '/message.jsonschema'
 
 # client = None
 # context = None
@@ -122,7 +125,7 @@ class Reactor(object):
             envstrings = []
 
         # add in nonce to the redact list via some heuristic measures
-        envstrings.extend(self.get_nonce_vals())
+        envstrings.extend(self._get_nonce_vals())
 
         # Set up logging
         #
@@ -206,8 +209,8 @@ class Reactor(object):
             _context.update(__context)
         return _context
 
-    def get_nonce_vals(self):
-        '''Fetch x-nonce if it was passed'''
+    def _get_nonce_vals(self):
+        '''Fetch x-nonce if it was passed. Used to set up redaction.'''
         nonce_vals = []
         try:
             nonce_value = self.context.get('x-nonce', None)
@@ -216,6 +219,24 @@ class Reactor(object):
         except Exception:
             pass
         return nonce_vals
+
+    def validate_message(self,
+                         messagedict,
+                         messageschema=MESSAGE_SCHEMA,
+                         permissive=True):
+        """
+        Validate dictonary derived from JSON against a JSON schema
+
+        Positional arguments:
+        messagedict - dict - JSON-derived object
+
+        Keyword arguments:
+        messageschema - str - path to the requisite JSON schema file
+        permissive - bool - swallow validation errors [True]
+        """
+        return jsonmessages.validate_message(messagedict,
+                                             messageschema=MESSAGE_SCHEMA,
+                                             permissive=permissive)
 
 
 def utcnow():

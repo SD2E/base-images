@@ -38,6 +38,9 @@ ADD reactors /reactors
 # Default actor and config files
 ADD reactor.py /
 ADD config.yml /
+ADD abacoschemas /abacoschemas
+ADD message.json* /message.jsonschema
+
 CMD ["python", "/reactor.py"]
 
 # Onbuild support

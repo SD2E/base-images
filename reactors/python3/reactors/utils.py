@@ -3,6 +3,7 @@ Utility library for building TACC Reactors
 """
 from __future__ import absolute_import
 
+import json
 import os
 import sys
 import petname
@@ -12,6 +13,7 @@ import datetime
 from attrdict import AttrDict
 from agavepy.actors import get_context
 from agavepy.actors import get_client
+
 # config library - replaces legacy config.py
 from tacconfig import config
 
@@ -20,7 +22,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.append(os.path.split(os.getcwd())[0])
 # print("sys_path: {}".format(sys.path))
 # sys.path.append('/reactors')
-from reactors import aliases, logs, storage, uniqueid, agaveutils
+from reactors import agaveutils, aliases, logs, jsonmessages, storage, uniqueid
 
 
 VERSION = '0.6.1'
@@ -28,6 +30,7 @@ LOG_LEVEL = 'ERROR'
 LOG_FILE = None
 NAMESPACE = '_REACTOR'
 HASH_SALT = '97JFXMGWBDaFWt8a4d9NJR7z3erNcAve'
+MESSAGE_SCHEMA = '/message.jsonschema'
 
 # client = None
 # context = None
@@ -216,6 +219,25 @@ class Reactor(object):
         except Exception:
             pass
         return nonce_vals
+
+    def validate_message(self,
+                         messagedict,
+                         messageschema=MESSAGE_SCHEMA,
+                         permissive=True):
+        """
+        Validate JSON string against a JSON schema
+
+        Positional arguments:
+        self
+        messageJSON - str - JSON text
+
+        Keyword arguments:
+        schema_file - str - path to the requisite JSON schema file
+        permissive - bool - swallow validation errors [False]
+        """
+        return jsonmessages.validate_message(messagedict,
+                                             messageschema=MESSAGE_SCHEMA,
+                                             permissive=permissive)
 
 
 def utcnow():
