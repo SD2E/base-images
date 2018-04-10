@@ -31,6 +31,9 @@ fi
 if [ ! -z "$CHANNEL" ]; then
     buildopts="$buildopts --no-cache --build-arg CHANNEL=${CHANNEL}"
 fi
+if [ "$DOCKER_PULL" == 1 ]; then
+    buildopts="$buildopts --pull --no-cache --build-arg CHANNEL=${CHANNEL}"
+fi
 
 echo "Image: $IMAGE"
 echo "Tag: $TAG"

@@ -14,7 +14,7 @@ Dockerhub:
     * `ubuntu16`
     * `ubuntu17` (preferred)
     * `ubuntu18` (experimental)
-    * `miniconda` (experimental)
+    * `miniconda3` (experimental)
 
 ## Features
 

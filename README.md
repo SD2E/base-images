@@ -11,7 +11,7 @@ this arrangement.
 
 |                base                |                     languages                    |                apps               |                         reactors                         |
 |:----------------------------------:|:------------------------------------------------:|:---------------------------------:|:--------------------------------------------------------:|
-| alpine36 centos7 ubuntu16 ubuntu17 | ubuntu16/python2 ubuntu17/python3 ubuntu17/java8 | python2/ubuntu16 python3/ubuntu17 | python2/ubuntu16 python2-conda/ubuntu16 python3/ubuntu17 |
+| alpine36 centos7 miniconda3 ubuntu16 ubuntu17 | ubuntu16/python2 ubuntu17/python3 ubuntu17/java8 | python2/ubuntu16 python3/ubuntu17 | python2/ubuntu16 python2-conda/ubuntu16 python3/ubuntu17 |
 
 ## Architecture
 
@@ -22,7 +22,7 @@ to developers and researchers relying on them.
 ```
 +-------------+
 |             |
-| ubuntu:dist |
+| <os>:dist   |
 |             |
 +-------------+
      |||
@@ -80,7 +80,7 @@ Development is Makefile-driven, with parameterization via build variables.
 | build all images         | make builds                  |                                           |                             |
 | specific image type      | make <type>(-build)          | apps, base, jupyter,  languages, reactors |                             |
 | specific release channel | make <target>-(build)        | stable, edge                              | CHANNEL=<channel>           |
-| specific base            | make base-(build)            | ubuntu16, ubuntu17                        | BASE=<dist>                 |
+| specific base            | make base-(build)            | ubuntu16, ubuntu17, miniconda3, ubuntu18  | BASE=<dist>                 |
 | specific language        | make language-(build)        | python2, python3                          | LANGUAGE=<lang>             |
 | specific language + base | make [apps,reactors]-(build) | see above                                 | LANGUAGE=<lang> BASE=<dist> |
 ```
@@ -96,11 +96,12 @@ make languages-build LANGUAGE=python2 BASE=ubuntu16 CHANNEL=edge
 
 Values passed to these variables inform the build process:
 
-`AGAVEPY_BRANCH` - AgavePy code branch [develop]
-`PYTHON_PIP_VERSION` - Version of pip installed in Python images [9.0.3]
-`NO_CACHE` - Rebuild everything without the Docker cache. [0]
-`NO_REMOVE` - Don't remove intermediate containers (helpful for debugging). [0]
-`CHANNEL` - Default is [stable]. Repositories explicitly also support `edge`
+* `AGAVEPY_BRANCH` - AgavePy code branch [develop]
+* `PYTHON_PIP_VERSION` - Version of pip installed in Python images [9.0.3]
+* `NO_CACHE` - Rebuild everything without the Docker cache. [0]
+* `NO_REMOVE` - Don't remove intermediate containers (helpful for debugging). [0]
+* `CHANNEL` - Default is [stable]. Repositories explicitly also support `edge`
+* `DOCKER_PULL` - Set `DOCKER_PULL=1` to force pull on build. [0]
 
 Example: Build Python2 based on Pip 9.0.1 and don't remove intermediates.
 
@@ -110,7 +111,7 @@ make languages-build LANGUAGE=python2 PYTHON_PIP_VERSION=9.0.1 NO_REMOVE=1
 
 ## Testing
 
-Formal testing is not yet implemented, though container builds are conducted
+Formal testing is not fully implemented, though container builds are conducted
 automatically via TravisCI on push to any branch. Images are pushed automatically
 to the SD2E DockerHub registry on successful commits to `master`.
 
