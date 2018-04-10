@@ -9,20 +9,10 @@ matrix:
       if: branch = develop
       env:
         - CHANNEL=edge
-      matrix:
-        - LANGUAGE=python2 BASE=ubuntu16
-        - LANGUAGE=python3 BASE=ubuntu16
-        - LANGUAGE=python2 BASE=ubuntu17
-        - LANGUAGE=python3 BASE=ubuntu17
     - # master builds and deploys stable
       if: branch = master
       env:
         - CHANNEL=stable
-      matrix:
-        - LANGUAGE=python2 BASE=ubuntu16
-        - LANGUAGE=python3 BASE=ubuntu16
-        - LANGUAGE=python2 BASE=ubuntu17
-        - LANGUAGE=python3 BASE=ubuntu17
 
 env:
   global:
@@ -40,10 +30,12 @@ after_script:
   - docker images ${REGISTRY_ORG}/*
 
 before_deploy:
-  - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+  - docker login -u "${REGISTRY_USER}" -p "${REGISTRY_PASS}"
 
 deploy:
   provider: script
-  script: bash scripts/push_containers_from_ci.sh ${REGISTRY_ORG}
+  script: bash scripts/push_containers_from_ci.sh ${REGISTRY_ORG} ${CHANNEL}
   on:
-    branch: master
+    branch:
+      - master
+      - develop
