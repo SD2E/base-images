@@ -2,7 +2,7 @@
 
 Docker images upon which language-specific apps and reactors base images
 are built. Presently alpine36, ubuntu16, centos7, and ubuntu17 are supported.
-Older versions (ubuntu14) and pre-release versions (ubuntu18) are available
+Older versions (ubuntu14) and pre-release versions (ubuntu18, miniconda3) are available
 but not officially supported. All base images have a stable
 and `-edge` release channel.
 
@@ -13,7 +13,8 @@ Dockerhub:
     * `ubuntu14` (deprecated)
     * `ubuntu16`
     * `ubuntu17` (preferred)
-    * `ubuntu18`
+    * `ubuntu18` (experimental)
+    * `miniconda` (experimental)
 
 ## Features
 
