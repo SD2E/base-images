@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.append(os.path.split(os.getcwd())[0])
 # print("sys_path: {}".format(sys.path))
 # sys.path.append('/reactors')
-from reactors import agaveutils, aliases, logs, jsonmessages, storage, uniqueid
+from reactors import agaveutils, alias, logs, jsonmessages, storage, uniqueid
 
 
 VERSION = '0.6.1'
@@ -100,6 +100,7 @@ class Reactor(object):
         self.uid = self.context.get('actor_id')
         self.execid = self.context.get('execution_id')
         self.state = self.context.get('state')
+        self.aliases = alias.AliasStore(self.client)
 
         localonly = str(os.environ.get('LOCALONLY', 0))
         if localonly == '1':

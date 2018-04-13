@@ -22,8 +22,8 @@
 #   CONFIG - Reactor config file (reactor.rc)
 #
 
-#COMMANDS="$@"
-COMMAND="pytest -s -vv"
+COMMANDS="$@"
+#COMMAND="pytest -s -vv"
 #COMMAND="ls -alth ."
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -83,7 +83,7 @@ if ((UNDER_CI)); then
   dockeropts=" --user=0:${CI_GID}"
 fi
 
-docker run -t ${dockeropts} ${envopts} ${MOUNTS} ${CONTAINER_IMAGE} $COMMAND
+docker run -t ${dockeropts} ${envopts} ${MOUNTS} ${CONTAINER_IMAGE} ${@}
 
 docker rmi -f ${CONTAINER_IMAGE}
 

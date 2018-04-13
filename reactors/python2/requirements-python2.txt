@@ -1,6 +1,6 @@
 AttrDict>=2.0.0
 PyYAML>=3.12
-agavedb>=0.2.1
+agavedb>=0.3.0
 hashids>=1.2.0
 jmespath>=0.9.3
 jsonschema>=2.6.0

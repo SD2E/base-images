@@ -13,3 +13,5 @@ lollipop==1.1.6
 # docs
 sphinx==1.6.3
 recommonmark==0.4.0
+# automation
+python-jenkins>=0.4.16

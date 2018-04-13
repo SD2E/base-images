@@ -8,7 +8,10 @@ sdk: sdk-clean
 	cp -R ../sdk/python/* .
 
 tests: clean sdk
-	bash tests/run-container-tests.sh
+	bash tests/run-container-tests.sh pytest -s -vv
+
+test-aliases: sdk
+	bash tests/run-container-tests.sh pytest -s -vv tests/test_reactors_aliases.py
 
 sdk-clean:
 	rm -rf tests

@@ -27,6 +27,24 @@ def set_alias(db, alias, actorid):
     return db.set(alias_key, actorid)
 
 
+def set_alias_acl(db, alias, acl):
+    '''Add ACLs to an alias'''
+    alias_key = create_alias_keyname(alias)
+    return db.setacl(alias_key, acl)
+
+
+def get_alias_acls(db, alias, user=None):
+    '''List ACLs for an alias, optionally filtering by username'''
+    alias_key = create_alias_keyname(alias)
+    return db.getacls(alias_key, user)
+
+
+def rem_alias_acl(db, alias, user=None):
+    '''Entirely remove a user's ACL for a given key'''
+    alias_key = create_alias_keyname(alias)
+    return db.remacl(alias_key, user)
+
+
 def get_alias(db, alias):
     '''Get a speciifc alias => actor mapping'''
     alias_key = create_alias_keyname(alias)
