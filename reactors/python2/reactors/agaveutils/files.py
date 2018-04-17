@@ -109,7 +109,8 @@ def wait_for_file_status(agaveClient, agaveWatchPath,
     #       implementation might spawn a temporary callback channel
     #       (i.e. requestbin) subscribed to only terminal events, then
     #       monitor its messages to watch for completion.
-    TERMINAL_STATES = ['CREATED', 'TRANSFORMING_COMPLETED', 'DOWNLOAD']
+    TERMINAL_STATES = ['STAGING_COMPLETED', 'TRANSFORMING_COMPLETED',
+                       'CREATED', 'DOWNLOAD']
 
     assert maxTime > 0
     assert maxTime <= 1000
