@@ -26,10 +26,11 @@ RUN mkdir -p ${SCRATCH} && \
 ENV _REACTOR_TEMP=${SCRATCH}
 
 # Core Python3 requirements
-ADD requirements-${LANGUAGE}.txt /tmp/requirements.txt
-RUN pip3 install -r /tmp/requirements.txt
+ADD requirements-${CHANNEL}.txt /tmp/requirements.txt
+RUN pip3 install --upgrade -r /tmp/requirements.txt
+RUN rm -rf /tmp/requirements.txt
 RUN pip3 install --upgrade git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
-RUN pip install --upgrade git+https://github.com/TACC/agavedb.git@${AGAVEPY_BRANCH}
+# RUN pip install --upgrade git+https://github.com/TACC/agavedb.git@${AGAVEPY_BRANCH}
 
 # In-progress language libraries
 
@@ -46,7 +47,7 @@ CMD ["python3", "/reactor.py"]
 
 # Onbuild support
 ONBUILD ADD requirements.txt /tmp/requirements.txt
-ONBUILD RUN pip3 install --upgrade -r /tmp/requirements.txt
+ONBUILD RUN pip3 install --disable-pip-version-check --upgrade -r /tmp/requirements.txt
 ONBUILD ADD reactor.py /
 ONBUILD ADD config.yml /
 # Allow for message.json and message.jsonschema as both are valid extensions

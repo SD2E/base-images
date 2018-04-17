@@ -1,0 +1,10 @@
+# This is a placeholder config.yml file to demonstrate that
+# automatic config reading and OBBUILD support works
+---
+key1: 'value1'
+redact: 'Hello there, sensitive data!'
+noredact: 'Hello there, insenstive data.'
+logs:
+  level: 'DEBUG'
+  file: 'reactor.log'
+  token: ~

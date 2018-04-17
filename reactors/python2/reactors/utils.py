@@ -13,6 +13,7 @@ import datetime
 from attrdict import AttrDict
 from agavepy.actors import get_context
 from agavepy.actors import get_client
+from time import sleep
 
 # config library - replaces legacy config.py
 from tacconfig import config
@@ -31,13 +32,15 @@ LOG_FILE = None
 NAMESPACE = '_REACTOR'
 HASH_SALT = '97JFXMGWBDaFWt8a4d9NJR7z3erNcAve'
 MESSAGE_SCHEMA = '/message.jsonschema'
-
-# client = None
-# context = None
-# nickname = None
-# settings = None
-# uid = None
-# username = None
+MAX_ELAPSED = 300
+MAX_RETRIES = 5
+SPECIAL_VARS_MAP = {'_abaco_actor_id': 'x_src_actor_id',
+                    '_abaco_execution_id': 'x_src_execution_id',
+                    'APP_ID': 'x_src_app_id',
+                    'JOB_ID': 'x_src_job_id',
+                    'EVENT': 'x_src_event',
+                    'UUID': 'x_src_uuid',
+                    '_event_uuid': 'x_external_event_id'}
 
 global client
 global context
@@ -101,6 +104,7 @@ class Reactor(object):
         self.execid = self.context.get('execution_id')
         self.state = self.context.get('state')
         self.aliases = alias.AliasStore(self.client)
+        self.aliascache = {}
 
         localonly = str(os.environ.get('LOCALONLY', 0))
         if localonly == '1':
@@ -164,6 +168,124 @@ class Reactor(object):
         self.logger.critical("{} : {}".format(
             failMessage, exceptionObject))
         sys.exit(1)
+
+    def _resolve_actor_id(self, actorId):
+        """Private method for looking up an Alias"""
+        # Look up actorId by name. Honor special alias 'me' to allow actor
+        # to message itself. Todo: Investigate whether its better/faster to
+        # query /actors for actorId before invoking the alias lookup
+        resolved_actor_id = None
+        if actorId == 'me':
+            resolved_actor_id = self.uid
+            self.logger.debug("Invoked 'me' convenience alias")
+        elif self.aliascache.get(actorId) is not None:
+            resolved_actor_id = self.aliascache.get(actorId)
+            self.logger.debug("Alias found in local cache")
+        else:
+            lookup = None
+            try:
+                lookup = self.aliases.get_name(actorId)
+            except Exception as e:
+                self.logger.debug("Unable to lookup {}: {}".format(actorId, e))
+            if lookup is not None:
+                resolved_actor_id = lookup
+                self.aliascache[actorId] = lookup
+            else:
+                resolved_actor_id = actorId
+                self.logger.debug("Giving up. It must be an actual actor ID")
+
+        # Coerce to stringy value Py2/Py3
+        if isinstance(resolved_actor_id, bytes):
+            return resolved_actor_id.decode('utf-8')
+        else:
+            return resolved_actor_id
+
+    def _make_sender_tags(self, senderTags=True):
+        """Private method for passing along provenance variables"""
+        sender_envs = {}
+        if senderTags is True:
+            for env in list(SPECIAL_VARS_MAP.keys()):
+                if os.environ.get(env):
+                    sender_envs[SPECIAL_VARS_MAP[env]] = os.environ.get(env)
+        return sender_envs
+
+    def _get_environment(self, passed_envs={},
+                         sender_envs={}, senderTags=True):
+        """Private method to merge user- and platform-specific envs"""
+        env_vars = passed_envs
+        sender_envs = self._make_sender_tags(senderTags)
+        env_vars.update(sender_envs)
+        return env_vars
+
+    def send_message(self, actorId, message,
+                     environment={}, ignoreErrors=True,
+                     senderTags=True, retryMaxAttempts=MAX_RETRIES,
+                     retryDelay=30, sync=False):
+        """
+        Send a message to an Abaco actor by its alias or ID
+
+        Positional parameters:
+        actorId - str - Valid actorId or alias
+        message - str/dict - Message to send
+
+        Keyword arguments:
+        ignoreErrors - bool -  only mark failures by logging not exception
+        retryDelay - int - seconds between retries on send failure
+        retryMax  - int - number of times (up to global MAX_RETRIES) to resend
+        environment - dict - environment variables to pass as url params
+        sync - not implemented
+        senderTags - not implemented
+
+        Returns
+        Execution ID as str
+
+        If ignoreErrors is True, this is a fire-and-forget operation. Else,
+        failures raise an Exception to handled by the caller.
+        """
+
+        environment_vars = self._get_environment(environment, senderTags)
+        resolved_actor_id = self._resolve_actor_id(actorId)
+
+        message_was_successful = False
+        execution_id = None
+        attempts = 0
+        exceptions = []
+
+        while message_was_successful is False and attempts <= retryMaxAttempts:
+
+            try:
+
+                self.logger.debug("Destination: {}".format(actorId))
+                self.logger.debug("Body: {}".format(message))
+                self.logger.debug("Env: {}".format(environment_vars))
+
+                response = self.client.actors.sendMessage(
+                    actorId=resolved_actor_id,
+                    body={'message': message},
+                    environment=environment_vars)
+
+                self.logger.debug("Response: {}".format(response))
+
+                execution_id = response.get('executionId', None)
+                message_was_successful = True
+            except Exception as e:
+                exceptions.append(e)
+                attempts = attempts + 1
+                if MAX_RETRIES > 1:
+                    self.logger.warning(
+                        "Retrying message to {}".format(actorId))
+                    sleep(retryDelay)
+
+        if execution_id is None:
+            error_message = "Message to {} failed with " + \
+                "Exception(s): {}".format(actorId, exceptions)
+            self.logger.error(error_message)
+            if ignoreErrors:
+                pass
+            else:
+                raise Exception(error_message)
+
+        return execution_id
 
     @classmethod
     def get_client_with_mock_support():

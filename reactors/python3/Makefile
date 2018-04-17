@@ -11,7 +11,7 @@ tests: clean sdk
 	bash tests/run-container-tests.sh pytest -s -vv
 
 test-aliases: sdk
-	bash tests/run-container-tests.sh pytest -s -vv tests/test_reactors_aliases.py
+	bash tests/run-container-tests.sh pytest -s -vv tests -k aliases
 
 sdk-clean:
 	rm -rf tests

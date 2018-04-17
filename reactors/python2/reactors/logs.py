@@ -11,6 +11,9 @@ import time
 import logging
 from builtins import str
 
+# don't redact strings less than this size
+MIN_REDACT_LEN = 4
+
 # possible log levels
 LEVELS = ('CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG')
 
@@ -48,7 +51,8 @@ class RedactingFormatter(object):
     def format(self, record):
         msg = self.orig_formatter.format(record)
         for pattern in self._patterns:
-            msg = msg.replace(pattern, "*****")
+            if len(pattern) > MIN_REDACT_LEN:
+                msg = msg.replace(pattern, "*****")
         return msg
 
     def __getattr__(self, attr):

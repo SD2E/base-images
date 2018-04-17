@@ -1,3 +1,6 @@
+#####################
+# reactors and apps #
+#####################
 AttrDict>=2.0.0
 PyYAML>=3.12
 hashids>=1.2.0
@@ -7,5 +10,6 @@ petname>=2.2
 python-jsonschema-objects==0.3.1
 pytz>=2017.2
 urllib3>=1.22
-agavedb>=0.3.0
+agavedb>=0.4.2
+agavepy>=0.7.0
 tacconfig>=0.5.2
