@@ -30,7 +30,7 @@ ADD requirements-${CHANNEL}.txt /tmp/requirements.txt
 RUN pip3 install --upgrade -r /tmp/requirements.txt
 RUN rm -rf /tmp/requirements.txt
 RUN pip3 install --upgrade git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
-# RUN pip install --upgrade git+https://github.com/TACC/agavedb.git@${AGAVEPY_BRANCH}
+RUN pip install --upgrade git+https://github.com/TACC/agavedb.git@${AGAVEPY_BRANCH}
 
 # In-progress language libraries
 

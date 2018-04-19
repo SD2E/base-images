@@ -23,7 +23,8 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.append(os.path.split(os.getcwd())[0])
 # print("sys_path: {}".format(sys.path))
 # sys.path.append('/reactors')
-from reactors import agaveutils, alias, logs, jsonmessages, storage, uniqueid
+from . import agaveutils, alias, logs,\
+    jsonmessages, process, storage, uniqueid
 
 
 VERSION = '0.6.1'
@@ -169,37 +170,6 @@ class Reactor(object):
             failMessage, exceptionObject))
         sys.exit(1)
 
-    def _resolve_actor_id(self, actorId):
-        """Private method for looking up an Alias"""
-        # Look up actorId by name. Honor special alias 'me' to allow actor
-        # to message itself. Todo: Investigate whether its better/faster to
-        # query /actors for actorId before invoking the alias lookup
-        resolved_actor_id = None
-        if actorId == 'me':
-            resolved_actor_id = self.uid
-            self.logger.debug("Invoked 'me' convenience alias")
-        elif self.aliascache.get(actorId) is not None:
-            resolved_actor_id = self.aliascache.get(actorId)
-            self.logger.debug("Alias found in local cache")
-        else:
-            lookup = None
-            try:
-                lookup = self.aliases.get_name(actorId)
-            except Exception as e:
-                self.logger.debug("Unable to lookup {}: {}".format(actorId, e))
-            if lookup is not None:
-                resolved_actor_id = lookup
-                self.aliascache[actorId] = lookup
-            else:
-                resolved_actor_id = actorId
-                self.logger.debug("Giving up. It must be an actual actor ID")
-
-        # Coerce to stringy value Py2/Py3
-        if isinstance(resolved_actor_id, bytes):
-            return resolved_actor_id.decode('utf-8')
-        else:
-            return resolved_actor_id
-
     def _make_sender_tags(self, senderTags=True):
         """Private method for passing along provenance variables"""
         sender_envs = {}
@@ -220,9 +190,9 @@ class Reactor(object):
     def send_message(self, actorId, message,
                      environment={}, ignoreErrors=True,
                      senderTags=True, retryMaxAttempts=MAX_RETRIES,
-                     retryDelay=30, sync=False):
+                     retryDelay=5, sync=False):
         """
-        Send a message to an Abaco actor by its alias or ID
+        Send a message to an Abaco actor by ID
 
         Positional parameters:
         actorId - str - Valid actorId or alias
@@ -244,7 +214,7 @@ class Reactor(object):
         """
 
         environment_vars = self._get_environment(environment, senderTags)
-        resolved_actor_id = self._resolve_actor_id(actorId)
+        resolved_actor_id = actorId
 
         message_was_successful = False
         execution_id = None
@@ -259,6 +229,13 @@ class Reactor(object):
                 self.logger.debug("Body: {}".format(message))
                 self.logger.debug("Env: {}".format(environment_vars))
 
+                # Temporarily not sending senderTags and environment due to
+                # agavepy writing wrong URL construct
+                # gO0JeWaBM4p3J/messages?environment=x_src_execution_id&
+                #    environment=x_src_actor_id&x_src_execution_id=
+                #    wa8P7jyJorRDq&x_src_actor_id=wZX5A5LgaY601
+                #
+                # essentially, duplicate empty vars are killing it
                 response = self.client.actors.sendMessage(
                     actorId=resolved_actor_id,
                     body={'message': message},
@@ -273,7 +250,8 @@ class Reactor(object):
                 attempts = attempts + 1
                 if MAX_RETRIES > 1:
                     self.logger.warning(
-                        "Retrying message to {}".format(actorId))
+                        "Retrying message to {} (Error: {})".format(
+                            actorId, e))
                     sleep(retryDelay)
 
         if execution_id is None:

@@ -7,11 +7,11 @@ all: image
 sdk: sdk-clean
 	cp -R ../sdk/python/* .
 
-tests: clean sdk
-	bash tests/run-container-tests.sh pytest -s -vv
+shell:
+	bash tests/run-container-tests.sh bash
 
-test-aliases: sdk
-	bash tests/run-container-tests.sh pytest -s -vv tests -k aliases
+tests: clean sdk
+	bash tests/run-container-tests.sh pytest -s -vv ${PYTESTOPTS}
 
 sdk-clean:
 	rm -rf tests

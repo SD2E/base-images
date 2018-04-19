@@ -31,7 +31,7 @@ ADD requirements-${CHANNEL}.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 RUN rm -rf /tmp/requirements.txt
 RUN pip install --upgrade git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
-# RUN pip install --upgrade git+https://github.com/TACC/agavedb.git@${AGAVEDB_BRANCH}
+RUN pip install --upgrade git+https://github.com/TACC/agavedb.git@${AGAVEDB_BRANCH}
 
 # In-progress language libraries
 

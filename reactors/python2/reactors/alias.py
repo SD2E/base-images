@@ -9,6 +9,7 @@ from __future__ import absolute_import
 from future.standard_library import install_aliases
 install_aliases()
 
+from os import environ
 import re
 
 from past.builtins import basestring
@@ -53,8 +54,21 @@ class AliasStore(AgaveKeyValStore):
         alias_key = self._createkey(alias)
         return self.remacl(alias_key, user=username)
 
+    # def get_name(self, alias):
+    #     '''Get a speciifc alias => entity name'''
+    #     alias_key = self._createkey(alias)
+    #     return self.get(alias_key)
+
     def get_name(self, alias):
-        '''Get a speciifc alias => entity name'''
+        """Get a speciifc alias => entity name
+
+        Implements a 'me' alias to return self
+        """
+        if alias == 'me':
+            alias_key = environ.get('_abaco_actor_id', None)
+            if alias_key is not None:
+                return alias_key
+
         alias_key = self._createkey(alias)
         return self.get(alias_key)
 

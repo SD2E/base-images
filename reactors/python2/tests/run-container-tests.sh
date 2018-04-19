@@ -83,9 +83,11 @@ if ((UNDER_CI)); then
   dockeropts=" --user=0:${CI_GID}"
 fi
 
-docker run -t ${dockeropts} ${envopts} ${MOUNTS} ${CONTAINER_IMAGE} ${@}
+docker run -it ${dockeropts} ${envopts} ${MOUNTS} ${CONTAINER_IMAGE} ${@}
 
-docker rmi -f ${CONTAINER_IMAGE}
+echo "${CONTAINER_IMAGE}"
+
+# docker rmi -f ${CONTAINER_IMAGE}
 
 # # Clean up: Set permissions and ownership on volume mount
 # if ((UNDER_CI)); then
