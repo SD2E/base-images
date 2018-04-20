@@ -106,6 +106,7 @@ class Reactor(object):
         self.state = self.context.get('state')
         self.aliases = alias.AliasStore(self.client)
         self.aliascache = {}
+        self.pemagent = agaveutils.recursive.PemAgent(self.client)
 
         localonly = str(os.environ.get('LOCALONLY', 0))
         if localonly == '1':

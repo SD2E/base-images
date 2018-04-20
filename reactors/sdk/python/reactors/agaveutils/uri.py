@@ -97,8 +97,8 @@ def from_agave_uri(uri=None, Validate=False):
         origDirPath = resourcepath[firstSlash + 1:]
         dirPath = '/' + os.path.dirname(origDirPath)
         fileName = os.path.basename(origDirPath)
-        if fileName is '':
-            fileName = '/'
+        # if fileName is '':
+        #     fileName = '/'
     except Exception as e:
         raise Exception(
             "Error resolving directory path or file name: {}".format(e))
