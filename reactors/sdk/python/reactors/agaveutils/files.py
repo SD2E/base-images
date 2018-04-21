@@ -75,6 +75,11 @@ def agave_upload_file(agaveClient,
     complete before returning. Raises exceptions on importData
     or timeout errors.
     """
+    # NOTE: I know a hack to fix the issue with in-place overwrites not having
+    # the proper terminal state. It should also increase the atomicity of the
+    # uploads process. Upload to a namespaced path (agaveDestPath.tmp), track
+    # that file, then do a mv operation at the end. Formally, its no differnt
+    # for provenance than uploading in place.
     try:
         agaveClient.files.importData(systemId=systemId,
                                      filePath=agaveDestPath,
