@@ -74,9 +74,9 @@ def get_logger(name, subname=None, log_level=LOG_LEVEL,
     redact - list - list of strings (no regex!) to filter in log messages
     """
     if subname is None:
-        LOG_FORMAT = "%(asctime)s [%(levelname)s] {} - %(message)s".format(name)
+        LOG_FORMAT = "%(asctime)s [%(levelname)s] %(message)s {}".format(name)
     else:
-        LOG_FORMAT = "%(asctime)s [%(levelname)s] {}:{} - %(message)s".format(name, subname)
+        LOG_FORMAT = "%(asctime)s [%(levelname)s] %(message)s {}:{}".format(name, subname)
 
     DATEFORMAT = "%Y-%m-%dT%H:%M:%SZ"
     logging.Formatter.converter = time.gmtime

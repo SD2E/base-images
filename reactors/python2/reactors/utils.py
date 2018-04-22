@@ -98,7 +98,7 @@ def get_context_with_mock_support():
 class Reactor(object):
     def __init__(self):
         '''Initialize class with a valid Agave API client'''
-        self.nickname = petname.Generate(3, '-')
+        self.nickname = petname.Generate(2, '-')
         self.context = get_context_with_mock_support()
         self.client = get_client_with_mock_support()
         self.uid = self.context.get('actor_id')
@@ -159,6 +159,36 @@ class Reactor(object):
                                       log_level=log_level,
                                       log_file=log_file,
                                       redactions=envstrings)
+
+    def get_attr(self, attribute=None, actorId=None):
+        """Retrieve dict of attributes for an actor
+
+        Parameters:
+        attribute - str - Any top-level key in the Actor API model
+        actorId   - str - Which actor (if not self) to fetch. Defaults to
+                          the actor's own ID, allowing introspection.
+        """
+        default_attr = None
+        default_dict = {}
+        if self.local is True:
+            default_attr = 'mockup'
+            default_dict = {}
+
+        if actorId is None:
+            fetch_id = self.uid
+        else:
+            fetch_id = actorId
+        try:
+            myself = self.client.actors.get(actorId=fetch_id)
+            if attribute is None:
+                return myself
+            else:
+                return myself.get(attribute, default_attr)
+        except Exception:
+            if actorId is None and attribute is None:
+                return default_dict
+            else:
+                return default_attr
 
     def on_success(self, successMessage="Success"):
         '''Log message and exit 0'''
