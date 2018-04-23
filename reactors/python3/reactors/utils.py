@@ -23,11 +23,12 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.append(os.path.split(os.getcwd())[0])
 # print("sys_path: {}".format(sys.path))
 # sys.path.append('/reactors')
-from . import agaveutils, alias, logs,\
+# from . import agaveutils, alias, logs,\
+#     loggers, jsonmessages, process, storage, uniqueid
+from . import agaveutils, alias, logtypes,\
     jsonmessages, process, storage, uniqueid
 
-
-VERSION = '0.6.1'
+VERSION = '0.6.2'
 LOG_LEVEL = 'ERROR'
 LOG_FILE = None
 NAMESPACE = '_REACTOR'
@@ -106,8 +107,10 @@ class Reactor(object):
         self.state = self.context.get('state')
         self.aliases = alias.AliasStore(self.client)
         self.aliascache = {}
+        self.loggers = AttrDict({'screen': None, 'slack': None})
         self.pemagent = agaveutils.recursive.PemAgent(self.client)
 
+        # Used by reactor implemetors to build conditionals for local testing
         localonly = str(os.environ.get('LOCALONLY', 0))
         if localonly == '1':
             self.local = True
@@ -120,7 +123,7 @@ class Reactor(object):
             self.username = 'unknown'
             pass
 
-        # bootstrap configuration via tacconfig module
+        # Bootstrap configuration via tacconfig module
         self.settings = config.read_config(namespace=NAMESPACE)
 
         # list of text strings to redact in all logs - in this case, all
@@ -130,7 +133,6 @@ class Reactor(object):
             envstrings = config.get_env_config_vals(namespace=NAMESPACE)
         except Exception:
             envstrings = []
-
         # add in nonce to the redact list via some heuristic measures
         envstrings.extend(self._get_nonce_vals())
 
@@ -152,13 +154,21 @@ class Reactor(object):
                 log_file = _log_file
         except Exception:
             pass
-        # Use 'redactions' from above to define a banlist of strings
-        #   These will be replaced with * characters in all logs
-        self.logger = logs.get_logger(self.uid,
-                                      self.execid,
-                                      log_level=log_level,
-                                      log_file=log_file,
-                                      redactions=envstrings)
+
+        # Set up multiple logger instances
+        # stderr is the basic print-to-screen logger
+        self.loggers.screen = logtypes.get_screen_logger(
+            self.uid, self.execid, log_level=log_level,
+            log_file=log_file, redactions=envstrings)
+
+        # assuming either env or config.yml is set up
+        # correctly, post messages from here to Slack
+        self.loggers.slack = logtypes.get_slack_logger(
+            self.uid, 'slack', self.settings.slack,
+            log_level=log_level, redactions=envstrings)
+
+        # Alias to stderr logger so that r.logger continues to work
+        self.logger = self.loggers.screen
 
     def get_attr(self, attribute=None, actorId=None):
         """Retrieve dict of attributes for an actor

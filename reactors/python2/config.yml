@@ -5,6 +5,11 @@ key1: 'value1'
 redact: 'Hello there, sensitive data!'
 noredact: 'Hello there, insenstive data.'
 logs:
-  level: 'DEBUG'
-  file: 'reactor.log'
+  level: DEBUG
+  file: ~
   token: ~
+slack:
+  icon_emoji: ":atom_symbol:"
+  username: "reactor-bot"
+  channel: "notifications"
+  webhook: ~

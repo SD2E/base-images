@@ -11,6 +11,8 @@ import time
 import logging
 from builtins import str
 
+from .slack import SlackHandler
+
 # don't redact strings less than this size
 MIN_REDACT_LEN = 4
 
@@ -59,44 +61,70 @@ class RedactingFormatter(object):
         return getattr(self.orig_formatter, attr)
 
 
-def get_logger(name, subname=None, log_level=LOG_LEVEL,
-               log_file=LOG_FILE, redactions=[]):
-    """
-    Create an instance of logger
+def _get_logger(name, subname, log_level, redactions):
 
-    Positional arguments:
-    name - str - the logger name
+    logger_name = '.'.join([name, subname])
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(log_level)
+    return logger
 
-    Keyword arguments:
-    subname - str - logger's secondary name
-    log_level - str - the logging level
-    log_file - str - filename relative to os.cwd() for logs (optional)
-    redact - list - list of strings (no regex!) to filter in log messages
-    """
-    if subname is None:
-        LOG_FORMAT = "%(asctime)s [%(levelname)s] %(message)s {}".format(name)
+
+def _get_formatter(name, subname, redactions, timestamp):
+
+    if timestamp is False:
+        LOG_FORMAT = "{} [%(levelname)s] %(message)s".format(name)
     else:
-        LOG_FORMAT = "%(asctime)s [%(levelname)s] %(message)s {}:{}".format(name, subname)
+        LOG_FORMAT = "{} %(asctime)s [%(levelname)s] %(message)s".format(name)
 
     DATEFORMAT = "%Y-%m-%dT%H:%M:%SZ"
     logging.Formatter.converter = time.gmtime
-
-    logger = logging.getLogger(name)
-    logger.setLevel(log_level)
     f = logging.Formatter(fmt=LOG_FORMAT, datefmt=DATEFORMAT)
     f.converter = time.gmtime
     f = RedactingFormatter(f, patterns=redactions)
+    return f
 
+
+def get_screen_logger(name, subname=None,
+                      log_level=LOG_LEVEL,
+                      log_file=LOG_FILE,
+                      redactions=[],
+                      timestamp=False):
+    logger = _get_logger(name, subname, log_level=LOG_LEVEL,
+                         redactions=redactions)
+    formatter = _get_formatter(name, subname, redactions, timestamp)
+    stderrLogger = logging.StreamHandler()
+    stderrLogger.setFormatter(formatter)
+    logger.addHandler(stderrLogger)
+
+    # Mirror to a file is log_file is set
     if log_file is not None:
         log_file_path = os.path.join(PWD, log_file)
         handler = logging.FileHandler(log_file_path)
-        handler.setFormatter(f)
+        handler.setFormatter(formatter)
         logger.addHandler(handler)
 
-    stderrLogger = logging.StreamHandler()
-    stderrLogger.setFormatter(f)
-    logger.addHandler(stderrLogger)
+    # TODO: Forward to log aggregator if token is set
 
     return logger
+
+
+def get_slack_logger(name, subname, config,
+                     log_level=LOG_LEVEL,
+                     redactions=[],
+                     timestamp=False):
+    '''Returns a logger object that can post to Slack'''
+    logger = _get_logger(name, subname, log_level=LOG_LEVEL,
+                         redactions=redactions)
+    formatter = _get_formatter(name, subname, redactions, timestamp)
+    slackLogger = SlackHandler(config)
+    slackLogger.setFormatter(formatter)
+    logger.addHandler(slackLogger)
+    return logger
+
+
+def get_logger(name, subname=None, log_level=LOG_LEVEL, log_file=None,
+               redactions=[], timestamp=False):
+    '''Alias to get_stderr_logger'''
+    return get_screen_logger(name, subname, log_level, redactions)
 
 # Verified Py3 compatible

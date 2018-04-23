@@ -1,1 +1,9 @@
 ---
+logs:
+  level: INFO
+  file: ~
+slack:
+  icon_emoji: ":robot_face:"
+  username: "slackbot"
+  channel: "random"
+  webhook: ~
