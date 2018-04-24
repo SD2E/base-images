@@ -15,15 +15,12 @@ from .slack import SlackHandler
 
 # don't redact strings less than this size
 MIN_REDACT_LEN = 4
-
 # possible log levels
 LEVELS = ('CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG')
-
 # default log file to be used when using the the combined strategy
 LOG_FILE = None
-
 # default log level
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'DEBUG'
 
 # log strategies that can be used. with combined, all logs go to one file;
 # with split, each pikaview has its own log file.
@@ -89,7 +86,8 @@ def get_screen_logger(name, subname=None,
                       log_file=LOG_FILE,
                       redactions=[],
                       timestamp=False):
-    logger = _get_logger(name, subname, log_level=LOG_LEVEL,
+    logger = _get_logger(name=name, subname=subname,
+                         log_level=LOG_LEVEL,
                          redactions=redactions)
     formatter = _get_formatter(name, subname, redactions, timestamp)
     stderrLogger = logging.StreamHandler()
@@ -113,7 +111,7 @@ def get_slack_logger(name, subname, config,
                      redactions=[],
                      timestamp=False):
     '''Returns a logger object that can post to Slack'''
-    logger = _get_logger(name, subname, log_level=LOG_LEVEL,
+    logger = _get_logger(name=name, subname=subname, log_level=LOG_LEVEL,
                          redactions=redactions)
     formatter = _get_formatter(name, subname, redactions, timestamp)
     slackLogger = SlackHandler(config)

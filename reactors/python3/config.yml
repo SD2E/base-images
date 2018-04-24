@@ -1,15 +1,15 @@
 # This is a placeholder config.yml file to demonstrate that
 # automatic config reading and OBBUILD support works
 ---
-key1: 'value1'
-redact: 'Hello there, sensitive data!'
-noredact: 'Hello there, insenstive data.'
+key1: value1
 logs:
-  level: DEBUG
   file: ~
+  level: DEBUG
   token: ~
+noredact: "Hello there, insenstive data."
+redact: "Hello there, sensitive data!"
 slack:
+  channel: notifications
   icon_emoji: ":atom_symbol:"
-  username: "reactor-bot"
-  channel: "notifications"
+  username: reactor-bot
   webhook: ~

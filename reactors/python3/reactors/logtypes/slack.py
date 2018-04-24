@@ -74,3 +74,5 @@ class SlackHandler(logging.Handler):
                 raise
             except Exception:
                 self.handleError(record)
+        else:
+            print("_REACTOR_SLACK_WEBHOOK not defined")

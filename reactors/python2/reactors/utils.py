@@ -29,7 +29,7 @@ from . import agaveutils, alias, logtypes,\
     jsonmessages, process, storage, uniqueid
 
 VERSION = '0.6.2'
-LOG_LEVEL = 'ERROR'
+LOG_LEVEL = 'DEBUG'
 LOG_FILE = None
 NAMESPACE = '_REACTOR'
 HASH_SALT = '97JFXMGWBDaFWt8a4d9NJR7z3erNcAve'
@@ -141,17 +141,15 @@ class Reactor(object):
         # Get logging level
         log_level = LOG_LEVEL
         try:
-            _log_level = self.settings.get('logs').get('level')
-            if isinstance(_log_level, str):
-                log_level = _log_level
+            _log_level = self.settings.get('logs').get('level', LOG_LEVEL)
+            log_level = _log_level
         except Exception:
             pass
         # Optional log file (relative to cwd())
         log_file = LOG_FILE
         try:
-            _log_file = self.settings.get('logs').get('file')
-            if isinstance(_log_file, str):
-                log_file = _log_file
+            _log_file = self.settings.get('logs').get('file', log_file)
+            log_file = _log_file
         except Exception:
             pass
 
@@ -266,9 +264,9 @@ class Reactor(object):
 
             try:
 
-                self.logger.debug("Destination: {}".format(actorId))
-                self.logger.debug("Body: {}".format(message))
-                self.logger.debug("Env: {}".format(environment_vars))
+                self.logger.info("message.to: {}".format(actorId))
+                self.logger.debug("message.body: {}".format(message))
+                self.logger.debug("message.env: {}".format(environment_vars))
 
                 # Temporarily not sending senderTags and environment due to
                 # agavepy writing wrong URL construct
@@ -282,7 +280,7 @@ class Reactor(object):
                     body={'message': message},
                     environment=environment_vars)
 
-                self.logger.debug("Response: {}".format(response))
+                self.logger.debug("message.response: {}".format(response))
 
                 execution_id = response.get('executionId', None)
                 message_was_successful = True
@@ -291,13 +289,13 @@ class Reactor(object):
                 attempts = attempts + 1
                 if MAX_RETRIES > 1:
                     self.logger.warning(
-                        "Retrying message to {} (Error: {})".format(
+                        "message.retry to {} (cause: {})".format(
                             actorId, e))
                     sleep(retryDelay)
 
         if execution_id is None:
-            error_message = "Message to {} failed with " + \
-                "Exception(s): {}".format(actorId, exceptions)
+            error_message = "message to {} failed with " + \
+                "exception(s): {}".format(actorId, exceptions)
             self.logger.error(error_message)
             if ignoreErrors:
                 pass
