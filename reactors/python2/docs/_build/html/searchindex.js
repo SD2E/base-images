@@ -1,0 +1,1 @@
+Search.setIndex({docnames:["index"],envversion:52,filenames:["index.rst"],objects:{"":{reactors:[0,0,0,"-"]}},objnames:{"0":["py","module","Python module"]},objtypes:{"0":"py:module"},terms:{index:0,modul:0,page:0,search:0},titles:["Sphinx Autodoc Example"],titleterms:{autodoc:0,exampl:0,indic:0,member:0,sphinx:0,tabl:0}})

@@ -4,7 +4,7 @@
 key1: value1
 logs:
   file: ~
-  level: DEBUG
+  level: INFO
   token: ~
 noredact: "Hello there, insenstive data."
 redact: "Hello there, sensitive data!"
@@ -13,3 +13,5 @@ slack:
   icon_emoji: ":atom_symbol:"
   username: reactor-bot
   webhook: ~
+logger:
+  path: /logger/reactors

@@ -4,6 +4,7 @@ Utility library for building TACC Reactors
 from __future__ import absolute_import
 
 import json
+import copy
 import os
 import sys
 import petname
@@ -19,6 +20,7 @@ from time import sleep
 from tacconfig import config
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+CONFIG_LOCS = [HERE, '/', os.getcwd()]
 sys.path.insert(0, os.path.dirname(HERE))
 sys.path.append(os.path.split(os.getcwd())[0])
 # print("sys_path: {}".format(sys.path))
@@ -96,6 +98,20 @@ def get_context_with_mock_support():
     return _context
 
 
+def read_config(namespace=NAMESPACE, places_list=CONFIG_LOCS,
+                update=True, env=True):
+    """Override tacconfig's broken right-favoring merge"""
+    master_config = None
+    for place in places_list:
+        new_config = config.read_config(namespace=namespace,
+                                        places_list=[place],
+                                        env=env)
+        if isinstance(new_config, dict) and master_config is None:
+            master_config = new_config.copy()
+        master_config = master_config + new_config
+    return master_config
+
+
 class Reactor(object):
     def __init__(self):
         '''Initialize class with a valid Agave API client'''
@@ -118,13 +134,20 @@ class Reactor(object):
             self.local = False
 
         try:
-            self.username = self.client.username.encode("utf-8", "strict")
+            self.username = self.context.get('username')
         except Exception:
-            self.username = 'unknown'
+            self.username = 'undefined'
             pass
 
         # Bootstrap configuration via tacconfig module
-        self.settings = config.read_config(namespace=NAMESPACE)
+        self.settings = read_config(namespace=NAMESPACE,
+                                    places_list=CONFIG_LOCS,
+                                    update=True,
+                                    env=True)
+        # self.settings = config.read_config(namespace=NAMESPACE,
+        #                                    places_list=CONFIG_LOCS,
+        #                                    update=True,
+        #                                    env=True)
 
         # list of text strings to redact in all logs - in this case, all
         # variables passed in as env overrides since we assume those are
@@ -158,6 +181,16 @@ class Reactor(object):
         self.loggers.screen = logtypes.get_screen_logger(
             self.uid, self.execid, log_level=log_level,
             log_file=log_file, redactions=envstrings)
+
+        # assuming either env or config.yml is set up
+        # correctly, post messages from here to a centralized
+        # log server built (at present) on ELK
+        logs_token = self.settings.get('logs', {}).get('token')
+        self.loggers.stream = logtypes.get_stream_logger(
+            self.uid, self.execid,
+            self.settings.get('logger', {}),
+            logs_token,
+            log_level=log_level, redactions=envstrings)
 
         # assuming either env or config.yml is set up
         # correctly, post messages from here to Slack

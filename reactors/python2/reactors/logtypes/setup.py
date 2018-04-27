@@ -12,6 +12,7 @@ import logging
 from builtins import str
 
 from .slack import SlackHandler
+from .logstash import LogstashPlaintextHandler
 
 # don't redact strings less than this size
 MIN_REDACT_LEN = 4
@@ -69,9 +70,9 @@ def _get_logger(name, subname, log_level, redactions):
 def _get_formatter(name, subname, redactions, timestamp):
 
     if timestamp is False:
-        LOG_FORMAT = "{} [%(levelname)s] %(message)s".format(name)
+        LOG_FORMAT = "{} %(levelname)s %(message)s".format(name)
     else:
-        LOG_FORMAT = "{} %(asctime)s [%(levelname)s] %(message)s".format(name)
+        LOG_FORMAT = "{} %(asctime)s %(levelname)s %(message)s".format(name)
 
     DATEFORMAT = "%Y-%m-%dT%H:%M:%SZ"
     logging.Formatter.converter = time.gmtime
@@ -102,7 +103,19 @@ def get_screen_logger(name, subname=None,
         logger.addHandler(handler)
 
     # TODO: Forward to log aggregator if token is set
+    return logger
 
+
+def get_stream_logger(name, subname, config, token,
+                      log_level=LOG_LEVEL,
+                      redactions=[],
+                      timestamp=False):
+    logger = _get_logger(name=name, subname=subname, log_level=LOG_LEVEL,
+                         redactions=redactions)
+    formatter = _get_formatter(name, subname, redactions, timestamp)
+    streamLogger = LogstashPlaintextHandler(config, token)
+    streamLogger.setFormatter(formatter)
+    logger.addHandler(streamLogger)
     return logger
 
 

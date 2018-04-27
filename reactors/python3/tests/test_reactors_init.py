@@ -21,7 +21,6 @@ def test_init():
     assert r.uid is not None
     assert r.execid is not None
     assert r.state is not None
-    assert r.username is not None
     assert isinstance(r.local, bool)
     assert isinstance(r.context, AttrDict)
     assert isinstance(r.state, dict)
