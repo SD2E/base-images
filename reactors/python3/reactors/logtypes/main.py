@@ -5,11 +5,10 @@ Usage: logger = get_logger(name, log_level, log_file)
 '''
 from __future__ import unicode_literals
 
+import json
 import os
-import re
 import time
 import logging
-from builtins import str
 
 from .slack import SlackHandler
 from .logstash import LogstashPlaintextHandler
@@ -82,6 +81,23 @@ def _get_formatter(name, subname, redactions, timestamp):
     return f
 
 
+def _get_logstash_formatter(name, subname, redactions, fields, timestamp):
+
+    logstruct = {'timestamp': '%(asctime)s',
+                 'message': '%(message)s',
+                 'level': '%(levelname)s'}
+    for (k, v) in list(fields.items()):
+        logstruct[k] = v
+
+    JSON_FORMAT = json.dumps(logstruct, indent=None, separators=(',', ':'))
+    DATEFORMAT = "%Y-%m-%dT%H:%M:%SZ"
+
+    f = logging.Formatter(fmt=JSON_FORMAT, datefmt=DATEFORMAT)
+    f.converter = time.gmtime
+    f = RedactingFormatter(f, patterns=redactions)
+    return f
+
+
 def get_screen_logger(name, subname=None,
                       log_level=LOG_LEVEL,
                       log_file=LOG_FILE,
@@ -90,6 +106,7 @@ def get_screen_logger(name, subname=None,
     logger = _get_logger(name=name, subname=subname,
                          log_level=LOG_LEVEL,
                          redactions=redactions)
+
     formatter = _get_formatter(name, subname, redactions, timestamp)
     stderrLogger = logging.StreamHandler()
     stderrLogger.setFormatter(formatter)
@@ -109,10 +126,13 @@ def get_screen_logger(name, subname=None,
 def get_stream_logger(name, subname, config, token,
                       log_level=LOG_LEVEL,
                       redactions=[],
-                      timestamp=False):
+                      timestamp=False,
+                      fields={}):
     logger = _get_logger(name=name, subname=subname, log_level=LOG_LEVEL,
                          redactions=redactions)
-    formatter = _get_formatter(name, subname, redactions, timestamp)
+    formatter = _get_logstash_formatter(name, subname,
+                                        redactions, fields, timestamp)
+
     streamLogger = LogstashPlaintextHandler(config, token)
     streamLogger.setFormatter(formatter)
     logger.addHandler(streamLogger)

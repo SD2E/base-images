@@ -6,8 +6,10 @@
 Sphinx Autodoc Example
 ======================
 
-.. autosummary:: reactors.utils
-  :members:
+.. automodule:: reactors
+
+    Members
+    =======
 
 
 Indices and tables

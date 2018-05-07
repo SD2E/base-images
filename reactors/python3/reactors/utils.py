@@ -177,6 +177,15 @@ class Reactor(object):
             pass
 
         # Set up multiple logger instances
+
+        # extras is a dict of fields that we want to send with every logstash
+        # structured log response
+        extras = {'actor_id': self.uid,
+                  'execution_id': self.execid,
+                  'nickname': self.nickname,
+                  'name': self.get_attr('name'),
+                  'username': 'undefined'}
+
         # stderr is the basic print-to-screen logger
         self.loggers.screen = logtypes.get_screen_logger(
             self.uid, self.execid, log_level=log_level,
@@ -190,7 +199,9 @@ class Reactor(object):
             self.uid, self.execid,
             self.settings.get('logger', {}),
             logs_token,
-            log_level=log_level, redactions=envstrings)
+            log_level=log_level,
+            redactions=envstrings,
+            fields=extras)
 
         # assuming either env or config.yml is set up
         # correctly, post messages from here to Slack

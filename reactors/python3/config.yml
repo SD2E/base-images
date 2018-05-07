@@ -4,7 +4,7 @@
 key1: value1
 logs:
   file: ~
-  level: INFO
+  level: DEBUG
   token: ~
 noredact: "Hello there, insenstive data."
 redact: "Hello there, sensitive data!"
