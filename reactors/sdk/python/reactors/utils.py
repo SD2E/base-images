@@ -46,13 +46,6 @@ SPECIAL_VARS_MAP = {'_abaco_actor_id': 'x_src_actor_id',
                     'UUID': 'x_src_uuid',
                     '_event_uuid': 'x_external_event_id'}
 
-global client
-global context
-global nickname
-global settings
-global uid
-global username
-
 
 def get_client_with_mock_support():
     '''
@@ -126,18 +119,18 @@ class Reactor(object):
         self.loggers = AttrDict({'screen': None, 'slack': None})
         self.pemagent = agaveutils.recursive.PemAgent(self.client)
 
+        # username is a private attribut of client
+        try:
+            self.username = self.client.username
+        except Exception:
+            self.username = 'unknown'
+
         # Used by reactor implemetors to build conditionals for local testing
         localonly = str(os.environ.get('LOCALONLY', 0))
         if localonly == '1':
             self.local = True
         else:
             self.local = False
-
-        try:
-            self.username = self.context.get('username')
-        except Exception:
-            self.username = 'undefined'
-            pass
 
         # Bootstrap configuration via tacconfig module
         self.settings = read_config(namespace=NAMESPACE,
@@ -159,55 +152,32 @@ class Reactor(object):
         # add in nonce to the redact list via some heuristic measures
         envstrings.extend(self._get_nonce_vals())
 
-        # Set up logging
-        #
-        # Get logging level
-        log_level = LOG_LEVEL
-        try:
-            _log_level = self.settings.get('logs').get('level', LOG_LEVEL)
-            log_level = _log_level
-        except Exception:
-            pass
-        # Optional log file (relative to cwd())
-        log_file = LOG_FILE
-        try:
-            _log_file = self.settings.get('logs').get('file', log_file)
-            log_file = _log_file
-        except Exception:
-            pass
+        # Set up logger instances
 
-        # Set up multiple logger instances
-
-        # extras is a dict of fields that we want to send with every logstash
+        # Dict of fields that we want to send with each logstash
         # structured log response
-        extras = {'actor_id': self.uid,
-                  'execution_id': self.execid,
+        extras = {'agent': self.uid,
+                  'task': self.execid,
                   'nickname': self.nickname,
                   'name': self.get_attr('name'),
-                  'username': 'undefined'}
+                  'username': self.username}
 
-        # stderr is the basic print-to-screen logger
+        # Screen logger prints to the following, depending on configuration
+        # STDERR - Always
+        # FILE   - If log_file is provided
+        # AGGREGATOR - If log_token is provided
         self.loggers.screen = logtypes.get_screen_logger(
-            self.uid, self.execid, log_level=log_level,
-            log_file=log_file, redactions=envstrings)
-
-        # assuming either env or config.yml is set up
-        # correctly, post messages from here to a centralized
-        # log server built (at present) on ELK
-        logs_token = self.settings.get('logs', {}).get('token')
-        self.loggers.stream = logtypes.get_stream_logger(
-            self.uid, self.execid,
-            self.settings.get('logger', {}),
-            logs_token,
-            log_level=log_level,
+            self.uid,
+            self.execid,
+            settings=self.settings,
             redactions=envstrings,
             fields=extras)
 
         # assuming either env or config.yml is set up
         # correctly, post messages from here to Slack
         self.loggers.slack = logtypes.get_slack_logger(
-            self.uid, 'slack', self.settings.slack,
-            log_level=log_level, redactions=envstrings)
+            self.uid, 'slack', settings=self.settings,
+            redactions=envstrings)
 
         # Alias to stderr logger so that r.logger continues to work
         self.logger = self.loggers.screen
@@ -348,50 +318,50 @@ class Reactor(object):
 
         return execution_id
 
-    @classmethod
-    def get_client_with_mock_support():
-        '''
-        Get the current Actor API client
+    # @classmethod
+    # def get_client_with_mock_support():
+    #     '''
+    #     Get the current Actor API client
 
-        Returns the Abaco actor's client if running deployed. Attempts to
-        bootstrap a client from supplied credentials if running in local or
-        debug mode.
-        '''
-        _client = None
-        if os.environ.get('_abaco_access_token') is None:
-            from agavepy.agave import Agave
-            try:
-                _client = Agave.restore()
-            except TypeError:
-                _client = None
-        else:
-            _client = get_client()
+    #     Returns the Abaco actor's client if running deployed. Attempts to
+    #     bootstrap a client from supplied credentials if running in local or
+    #     debug mode.
+    #     '''
+    #     _client = None
+    #     if os.environ.get('_abaco_access_token') is None:
+    #         from agavepy.agave import Agave
+    #         try:
+    #             _client = Agave.restore()
+    #         except TypeError:
+    #             _client = None
+    #     else:
+    #         _client = get_client()
 
-        return _client
+    #     return _client
 
-    @classmethod
-    def get_context_with_mock_support():
-        '''
-        Return the current Actor context
+    # @classmethod
+    # def get_context_with_mock_support():
+    #     '''
+    #     Return the current Actor context
 
-        Return the Abaco actor's environment context if running deployed.
-        Creates a test context based on inferred or mocked values if running
-        in local or debug mode.
-        '''
-        _context = get_context()
-        if os.environ.get('_abaco_actor_id') is None:
-            _phony_actor_id = uniqueid.get_id() + '.local'
-            __context = AttrDict({'raw_message': os.environ.get('MSG', ''),
-                                  'content_type': 'application/json',
-                                  'execution_id': uniqueid.get_id() + '.local',
-                                  'username': os.environ.get(
-                                  '_abaco_username'),
-                                  'state': {},
-                                  'actor_dbid': _phony_actor_id,
-                                  'actor_id': _phony_actor_id})
-            # Merge new values from __context
-            _context.update(__context)
-        return _context
+    #     Return the Abaco actor's environment context if running deployed.
+    #     Creates a test context based on inferred or mocked values if running
+    #     in local or debug mode.
+    #     '''
+    #     _context = get_context()
+    #     if os.environ.get('_abaco_actor_id') is None:
+    #         _phony_actor_id = uniqueid.get_id() + '.local'
+    #         __context = AttrDict({'raw_message': os.environ.get('MSG', ''),
+    #                               'content_type': 'application/json',
+    #                               'execution_id': uniqueid.get_id() + '.local',
+    #                               'username': os.environ.get(
+    #                               '_abaco_username'),
+    #                               'state': {},
+    #                               'actor_dbid': _phony_actor_id,
+    #                               'actor_id': _phony_actor_id})
+    #         # Merge new values from __context
+    #         _context.update(__context)
+    #     return _context
 
     def _get_nonce_vals(self):
         '''Fetch x-nonce if it was passed. Used to set up redaction.'''
