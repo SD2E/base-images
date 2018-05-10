@@ -1,5 +1,6 @@
 FROM alpine:3.6
 LABEL ORG=sd2e.org IMAGE=base
+LABEL cloud.tacc.project="DARPA SD2E"
 
 RUN apk add --update bash curl git vim && \
     rm -f /var/cache/apk/*

@@ -1,8 +1,8 @@
 FROM sd2e/base:alpine36
 
 ARG CHANNEL=stable
-ARG LANGUAGE=python2
 ARG BASE=alpine36
+ARG LANGUAGE=python2
 
 ARG AGAVEPY_BRANCH=develop
 ARG PYTHON_PIP_VERSION=9.0.3
