@@ -82,7 +82,7 @@ def get_context_with_mock_support():
         __context = AttrDict({'raw_message': os.environ.get('MSG', ''),
                               'content_type': 'application/json',
                               'execution_id': uniqueid.get_id(),
-                              'username': os.environ.get('_abaco_username'),
+                              'username': os.environ.get('_abaco_username', None),
                               'state': {},
                               'actor_dbid': _phony_actor_id,
                               'actor_id': _phony_actor_id})
@@ -119,11 +119,18 @@ class Reactor(object):
         self.loggers = AttrDict({'screen': None, 'slack': None})
         self.pemagent = agaveutils.recursive.PemAgent(self.client)
 
-        # username is a private attribut of client
-        try:
-            self.username = self.client.username
-        except Exception:
-            self.username = 'unknown'
+        # abaco injects the requester's username into context
+        _username = self.context.get('username', None)
+        # if it's not present, we assume the code is running under
+        # local emulation or just inside a unit test - poll the profiles
+        # service to get the username, a slow but reliabe operation
+        if (_username is None) or (_username == ''):
+            try:
+                # username is a private attribut of client in testing mode
+                _username = self.client.profiles.get()['username']
+            except Exception:
+                _username = 'none'
+        self.username = _username
 
         # Used by reactor implemetors to build conditionals for local testing
         localonly = str(os.environ.get('LOCALONLY', 0))

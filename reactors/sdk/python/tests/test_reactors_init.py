@@ -42,3 +42,22 @@ def test_localonly_false(monkeypatch):
     r = Reactor()
     rlocal = r.local
     assert rlocal is False
+
+
+def test_username_from_env(monkeypatch):
+    '''Can we pick up username from ENV'''
+    monkeypatch.setenv('_abaco_username', 'taco')
+    assert '_abaco_username' in os.environ
+    r = Reactor()
+    assert 'username' in r.context
+    r_uname = r.username
+    assert r_uname == 'taco'
+
+
+def test_username_from_client():
+    '''Can we pick up username from Agave.client'''
+    from agavepy.agave import Agave
+    ag = Agave.restore()
+    local_uname = ag.profiles.get()['username']
+    r = Reactor()
+    assert local_uname == r.username
