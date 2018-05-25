@@ -301,9 +301,10 @@ class Reactor(object):
                     body={'message': message},
                     environment=environment_vars)
 
-                self.logger.debug("message.response: {}".format(response))
-
                 execution_id = response.get('executionId', None)
+                if execution_id is None:
+                    self.logger.debug("message.err: {}".format(response))
+
                 message_was_successful = True
             except Exception as e:
                 exceptions.append(e)
