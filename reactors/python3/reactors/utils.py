@@ -44,8 +44,7 @@ SPECIAL_VARS_MAP = {'_abaco_actor_id': 'x_src_actor_id',
                     'JOB_ID': 'x_src_job_id',
                     'EVENT': 'x_src_event',
                     'UUID': 'x_src_uuid',
-                    '_event_uuid': 'x_session',
-                    'SESSION': 'x_session'}
+                    '_event_uuid': 'x_session'}
 
 
 def get_client_with_mock_support():
@@ -247,6 +246,9 @@ class Reactor(object):
             for env in list(SPECIAL_VARS_MAP.keys()):
                 if os.environ.get(env):
                     sender_envs[SPECIAL_VARS_MAP[env]] = os.environ.get(env)
+
+        if 'x_session' not in sender_envs:
+            sender_envs['x_session'] = self.session
         return sender_envs
 
     def _get_environment(self, passed_envs={},
