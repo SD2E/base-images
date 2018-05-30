@@ -44,7 +44,8 @@ SPECIAL_VARS_MAP = {'_abaco_actor_id': 'x_src_actor_id',
                     'JOB_ID': 'x_src_job_id',
                     'EVENT': 'x_src_event',
                     'UUID': 'x_src_uuid',
-                    '_event_uuid': 'x_external_event_id'}
+                    '_event_uuid': 'x_session',
+                    'SESSION': 'x_session'}
 
 
 def get_client_with_mock_support():
@@ -119,11 +120,20 @@ class Reactor(object):
         self.loggers = AttrDict({'screen': None, 'slack': None})
         self.pemagent = agaveutils.recursive.PemAgent(self.client)
 
+        # a session in this context is a linked set of executions
+        # that inherit an id from their parent. if a reactor doesn't
+        # have a session, it creates one from its nickname.
+        self.session = self.context.get('x_session',
+                                        self.context.get(
+                                            'SESSION',
+                                            self.nickname))
+
         # abaco injects the requester's username into context
-        _username = self.context.get('username', None)
+        #
         # if it's not present, we assume the code is running under
         # local emulation or just inside a unit test - poll the profiles
         # service to get the username, a slow but reliabe operation
+        _username = self.context.get('username', None)
         if (_username is None) or (_username == ''):
             try:
                 # username is a private attribut of client in testing mode
@@ -165,9 +175,9 @@ class Reactor(object):
         # structured log response
         extras = {'agent': self.uid,
                   'task': self.execid,
-                  'nickname': self.nickname,
                   'name': self.get_attr('name'),
-                  'username': self.username}
+                  'username': self.username,
+                  'session': self.session}
 
         # Screen logger prints to the following, depending on configuration
         # STDERR - Always
@@ -287,7 +297,7 @@ class Reactor(object):
 
                 self.logger.info("message.to: {}".format(actorId))
                 self.logger.debug("message.body: {}".format(message))
-                self.logger.debug("message.env: {}".format(environment_vars))
+                # self.logger.debug("message.env: {}".format(environment_vars))
 
                 # Temporarily not sending senderTags and environment due to
                 # agavepy writing wrong URL construct

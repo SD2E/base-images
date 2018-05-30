@@ -61,3 +61,34 @@ def test_username_from_client():
     local_uname = ag.profiles.get()['username']
     r = Reactor()
     assert local_uname == r.username
+
+
+def test_x_session(monkeypatch):
+    '''can we get x_session from environment'''
+    monkeypatch.setenv('x_session', 'smooth-eel')
+    r = Reactor()
+    assert r.session == 'smooth-eel'
+
+
+def test_session(monkeypatch):
+    '''can we get SESSION from environment'''
+    monkeypatch.setenv('SESSION', 'slimy-eel')
+    r = Reactor()
+    assert r.session == 'slimy-eel'
+
+
+def test_session_env(monkeypatch):
+    '''can we set up environment for messaging'''
+    monkeypatch.setenv('SESSION', 'slimy-eel')
+    r = Reactor()
+    e = r._get_environment()
+    assert isinstance(e, dict)
+    assert 'x_session' in e
+    assert e['x_session'] == 'slimy-eel'
+
+
+def test_session_autoname(monkeypatch):
+    '''can we bootstrap a session name'''
+    monkeypatch.setenv('nickname', 'slimy-eel')
+    r = Reactor()
+    assert r.nickname == r.session
