@@ -2,6 +2,8 @@
 import os
 import sys
 import logging
+from time import sleep
+from random import random
 
 __version__ = '0.1.0'
 
@@ -81,6 +83,8 @@ class PemAgent(object):
                                                 body={'username': username,
                                                       'permission': pem,
                                                       'recursive': rec})
+            # introduce pseudo-random delay between pems calls
+            sleep(0.5 * random())
         except Exception as e:
             if permissive is True:
                 self.logger.error(
