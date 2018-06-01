@@ -11,7 +11,7 @@ shell:
 	bash tests/run-container-tests.sh bash
 
 tests: clean sdk
-	bash tests/run-container-tests.sh pytest -s -vv ${PYTESTOPTS}
+	bash tests/run-container-tests.sh pytest ${PYTESTOPTS}
 
 sdk-clean:
 	rm -rf tests

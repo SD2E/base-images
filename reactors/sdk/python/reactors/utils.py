@@ -46,6 +46,14 @@ SPECIAL_VARS_MAP = {'_abaco_actor_id': 'x_src_actor_id',
                     'UUID': 'x_src_uuid',
                     '_event_uuid': 'x_session'}
 
+ABACO_VARS_MAP = {'content_type': '_abaco_Content-Type',
+                  'execution_id': '_abaco_execution_id',
+                  'username': '_abaco_username',
+                  'state': '_abaco_actor_state',
+                  'actor_dbid': '_abaco_actor_dbid',
+                  'actor_id': '_abaco_actor_id',
+                  'raw_message': 'MSG'}
+
 
 def get_client_with_mock_support():
     '''
@@ -68,7 +76,7 @@ def get_client_with_mock_support():
     return _client
 
 
-def get_context_with_mock_support():
+def get_context_with_mock_support(agaveClient):
     '''
     Return the current Actor context
 
@@ -79,16 +87,66 @@ def get_context_with_mock_support():
     _context = get_context()
     if os.environ.get('_abaco_actor_id') is None:
         _phony_actor_id = uniqueid.get_id()
+        _phony_exec_id = uniqueid.get_id()
+        _username = os.environ.get('_abaco_username', None)
+        if _username is None:
+            try:
+                _username = agaveClient.username
+            except Exception:
+                pass
+
         __context = AttrDict({'raw_message': os.environ.get('MSG', ''),
                               'content_type': 'application/json',
-                              'execution_id': uniqueid.get_id(),
-                              'username': os.environ.get('_abaco_username', None),
-                              'state': {},
+                              'username': _username,
                               'actor_dbid': _phony_actor_id,
-                              'actor_id': _phony_actor_id})
+                              'actor_id': _phony_actor_id,
+                              'execution_id': _phony_exec_id,
+                              'state': {}})
         # Merge new values from __context
         _context = _context + __context
-    return _context
+        # Update environment
+        set_os_environ_from_mock(__context)
+        set_os_environ_from_client(agaveClient)
+    return AttrDict(_context)
+
+
+def get_token_with_mock_support(client):
+    '''Find current Oauth2 access token from context or mock'''
+    token = None
+    try:
+        token = os.environ.get('_abaco_access_token', None)
+    except Exception:
+        pass
+    if token is not None and token is not '':
+        try:
+            token = client._token
+        except Exception:
+            pass
+    return token
+
+
+def set_os_environ_from_mock(context={}):
+    '''Set environment vars to mocked values'''
+    try:
+        for (k, v) in context.items():
+            abenv = ABACO_VARS_MAP[k]
+            os.environ[abenv] = str(v)
+    except Exception:
+        pass
+    return True
+
+
+def set_os_environ_from_client(ag):
+    '''Set environment vars to client values'''
+    try:
+        os.environ['_abaco_api_server'] = ag.api_server
+    except Exception:
+        pass
+    try:
+        os.environ['_abaco_access_token'] = ag._token
+    except Exception:
+        pass
+    return True
 
 
 def read_config(namespace=NAMESPACE, places_list=CONFIG_LOCS,
@@ -109,8 +167,9 @@ class Reactor(object):
     def __init__(self):
         '''Initialize class with a valid Agave API client'''
         self.nickname = petname.Generate(2, '-')
-        self.context = get_context_with_mock_support()
         self.client = get_client_with_mock_support()
+        self.context = get_context_with_mock_support(self.client)
+        self._token = get_token_with_mock_support(self.client)
         self.uid = self.context.get('actor_id')
         self.execid = self.context.get('execution_id')
         self.state = self.context.get('state')
@@ -163,6 +222,9 @@ class Reactor(object):
         # intended to be secret (or at least not easily discoverable).
         try:
             envstrings = config.get_env_config_vals(namespace=NAMESPACE)
+            if self._token is not None:
+                if len(self._token) > 3:
+                    envstrings.append(self._token)
         except Exception:
             envstrings = []
         # add in nonce to the redact list via some heuristic measures
