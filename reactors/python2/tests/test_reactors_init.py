@@ -12,7 +12,7 @@ PARENT = os.path.dirname(HERE)
 sys.path.insert(0, PARENT)
 sys.path.append('/reactors')
 import pytest
-from reactors.utils import Reactor
+from reactors.utils import Reactor, ABACO_VARS_MAP
 
 
 def test_init():
@@ -23,7 +23,7 @@ def test_init():
     assert r.state is not None
     assert isinstance(r.local, bool)
     assert isinstance(r.context, AttrDict)
-    assert isinstance(r.state, dict)
+    # assert isinstance(r.state, dict)
     assert isinstance(r.client, Agave)
     assert isinstance(r.logger, Logger)
 
@@ -63,6 +63,13 @@ def test_username_from_client():
     assert local_uname == r.username
 
 
+def test_token_available():
+    '''Can we pick up Oauth token'''
+    r = Reactor()
+    assert r._token is not None
+    assert isinstance(r._token, str)
+
+
 def test_x_session(monkeypatch):
     '''can we get x_session from environment'''
     monkeypatch.setenv('x_session', 'smooth-eel')
@@ -92,3 +99,14 @@ def test_session_autoname(monkeypatch):
     monkeypatch.setenv('nickname', 'slimy-eel')
     r = Reactor()
     assert r.nickname == r.session
+
+
+def test_env_from_mock():
+    '''Does the environment get populated in mock context'''
+    r = Reactor()
+    tok = r.client._token
+    srv = r.client.api_server
+    assert os.environ.get('_abaco_api_server', None) == srv
+    assert os.environ.get('_abaco_access_token', None) == tok
+    for k, v in ABACO_VARS_MAP.items():
+        assert v in os.environ.keys()
