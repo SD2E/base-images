@@ -3,18 +3,19 @@ Utility library for building TACC Reactors
 """
 from __future__ import absolute_import
 
-import json
-import copy
 import os
 import sys
+import datetime
+from time import sleep
+from random import random
+
 import petname
 import pytz
-import datetime
 
 from attrdict import AttrDict
 from agavepy.actors import get_context
 from agavepy.actors import get_client
-from time import sleep
+from requests.exceptions import HTTPError
 
 # config library - replaces legacy config.py
 from tacconfig import config
@@ -76,7 +77,7 @@ def get_client_with_mock_support():
     return _client
 
 
-def get_context_with_mock_support(agaveClient):
+def get_context_with_mock_support(agave_client):
     '''
     Return the current Actor context
 
@@ -91,7 +92,7 @@ def get_context_with_mock_support(agaveClient):
         _username = os.environ.get('_abaco_username', None)
         if _username is None:
             try:
-                _username = agaveClient.username
+                _username = agave_client.username
             except Exception:
                 pass
 
@@ -106,7 +107,7 @@ def get_context_with_mock_support(agaveClient):
         _context = _context + __context
         # Update environment
         set_os_environ_from_mock(__context)
-        set_os_environ_from_client(agaveClient)
+        set_os_environ_from_client(agave_client)
     return AttrDict(_context)
 
 
@@ -117,7 +118,7 @@ def get_token_with_mock_support(client):
         token = os.environ.get('_abaco_access_token', None)
     except Exception:
         pass
-    if token is not None and token is not '':
+    if token is not None and token != '':
         try:
             token = client._token
         except Exception:
@@ -125,25 +126,27 @@ def get_token_with_mock_support(client):
     return token
 
 
-def set_os_environ_from_mock(context={}):
+def set_os_environ_from_mock(context):
     '''Set environment vars to mocked values'''
+    if context is None:
+        context = {}
     try:
-        for (k, v) in context.items():
-            abenv = ABACO_VARS_MAP[k]
-            os.environ[abenv] = str(v)
+        for (env_k, env_v) in context.items():
+            abenv = ABACO_VARS_MAP[env_k]
+            os.environ[abenv] = str(env_v)
     except Exception:
         pass
     return True
 
 
-def set_os_environ_from_client(ag):
+def set_os_environ_from_client(agave_client):
     '''Set environment vars to client values'''
     try:
-        os.environ['_abaco_api_server'] = ag.api_server
+        os.environ['_abaco_api_server'] = agave_client.api_server
     except Exception:
         pass
     try:
-        os.environ['_abaco_access_token'] = ag._token
+        os.environ['_abaco_access_token'] = agave_client._token
     except Exception:
         pass
     return True
@@ -164,11 +167,11 @@ def read_config(namespace=NAMESPACE, places_list=CONFIG_LOCS,
 
 
 class Reactor(object):
+    '''Utility object for working with the Actors API and execution environment'''
     def __init__(self):
-        '''Initialize class with a valid Agave API client'''
         self.nickname = petname.Generate(2, '-')
         self.client = get_client_with_mock_support()
-        self.context = get_context_with_mock_support(self.client)
+        self.context = get_context_with_mock_support(agave_client=self.client)
         self._token = get_token_with_mock_support(self.client)
         self.uid = self.context.get('actor_id')
         self.execid = self.context.get('execution_id')
@@ -324,126 +327,139 @@ class Reactor(object):
     def send_message(self, actorId, message,
                      environment={}, ignoreErrors=True,
                      senderTags=True, retryMaxAttempts=MAX_RETRIES,
-                     retryDelay=5, sync=False):
+                     retryDelay=1, sync=False):
         """
         Send a message to an Abaco actor by ID
 
         Positional parameters:
-        actorId - str - Valid actorId or alias
-        message - str/dict - Message to send
+        actorId: str - Valid actorId or alias
+        message: str/dict - Message to send
 
         Keyword arguments:
-        ignoreErrors - bool -  only mark failures by logging not exception
-        retryDelay - int - seconds between retries on send failure
-        retryMax  - int - number of times (up to global MAX_RETRIES) to resend
-        environment - dict - environment variables to pass as url params
-        sync - not implemented
-        senderTags - not implemented
+        ignoreErrors: bool -  only mark failures by logging not exception
+        environment: dict - environment variables to pass as url params
+        senderTags: bool - send provenance and session vars along
+        retryDelay: int - seconds between retries on send failure
+        retryMax: int - number of times (up to global MAX_RETRIES) to retry
+        sync: bool - not implemented - wait for message to execute
 
-        Returns
-        Execution ID as str
+        Returns:
+        execution_id: str
 
         If ignoreErrors is True, this is a fire-and-forget operation. Else,
         failures raise an Exception to handled by the caller.
         """
 
-        environment_vars = self._get_environment(environment, senderTags)
+        # TODO: Call alias resolver
         resolved_actor_id = actorId
+        # Build dynamic list of variables. This is how attributes like
+        # session and sender-id are propagated
+        environment_vars = self._get_environment(environment, senderTags)
 
-        message_was_successful = False
-        execution_id = None
+        retry = retryDelay
         attempts = 0
+        execution_id = None
         exceptions = []
+        httperror = '{}: {}; message: {}; status: {}; version: {}'
+        noexecid_err = 'Response received from {} but no executionId was found'
+        exception_err = 'Exception encountered messaging {}'
+        terminal_err = 'Message to {} failed after {} tries with errors: {}'
 
-        while message_was_successful is False and attempts <= retryMaxAttempts:
+        while attempts <= retryMaxAttempts:
 
             try:
 
                 self.logger.info("message.to: {}".format(actorId))
                 self.logger.debug("message.body: {}".format(message))
-                # self.logger.debug("message.env: {}".format(environment_vars))
 
-                # Temporarily not sending senderTags and environment due to
-                # agavepy writing wrong URL construct
-                # gO0JeWaBM4p3J/messages?environment=x_src_execution_id&
-                #    environment=x_src_actor_id&x_src_execution_id=
-                #    wa8P7jyJorRDq&x_src_actor_id=wZX5A5LgaY601
-                #
-                # essentially, duplicate empty vars are killing it
                 response = self.client.actors.sendMessage(
                     actorId=resolved_actor_id,
                     body={'message': message},
                     environment=environment_vars)
 
-                execution_id = response.get('executionId', None)
-                if execution_id is None:
-                    self.logger.debug("message.err: {}".format(response))
+                if 'executionId' in response:
+                    execution_id = response.get('executionId')
+                    if execution_id is not None:
+                        return execution_id
+                    else:
+                        self.logger.error(
+                            noexecid_err.format(resolved_actor_id))
+                else:
+                    self.logger.error(
+                        noexecid_err.format(resolved_actor_id))
 
-                message_was_successful = True
+            # TODO - Generalize to process all TACC.cloud HTTP errors
+            except HTTPError as h:
+
+                exceptions.append(h)
+                # extract HTTP response code
+                code = -1
+                try:
+                    code = h.response.status_code
+                    assert isinstance(code, int)
+                except Exception:
+                    # we have no idea what the hell happened
+                    code = 418
+
+                # extract HTTP reason
+                reason = 'UNKNOWN ERROR'
+                try:
+                    reason = h.response.reason
+                except Exception:
+                    pass
+
+                # Extract textual response elements
+                #
+                # agave and abaco will give json responses if the
+                # underlying service is at all capable of doing so
+                # so try to extract fields from it if we can.
+                #
+                # otherwise, return the actual text of the response
+                # in error message
+                err_msg = 'Unexpected encountered by the web service'
+                status_msg = 'error'
+                version_msg = 'unknown'
+                try:
+                    j = h.response.json()
+                    if 'message' in j:
+                        err_msg = j['message']
+                    if 'status' in j:
+                        status_msg = j['status']
+                    if 'version' in j:
+                        version_msg = j['version']
+                except Exception:
+                    err_msg = h.response.text
+
+                httperror = '{}: {}; message: {}; status: {}; version: {}'
+                self.logger.error(httperror.format(code, reason,
+                                                   err_msg, status_msg,
+                                                   version_msg))
+
+            # This should only happen in egregious circumstances
+            # since the vast majority of AgavePy error manifest as
+            # a requests HTTPError
             except Exception as e:
                 exceptions.append(e)
-                attempts = attempts + 1
-                if MAX_RETRIES > 1:
-                    self.logger.warning(
-                        "message.retry to {} (cause: {})".format(
-                            actorId, e))
-                    sleep(retryDelay)
+                self.logger.error(exception_err.format(resolved_actor_id))
 
-        if execution_id is None:
-            error_message = "message to {} failed with " + \
-                "exception(s): {}".format(actorId, exceptions)
-            self.logger.error(error_message)
-            if ignoreErrors:
-                pass
-            else:
-                raise Exception(error_message)
+            attempts = attempts + 1
+            # random-skew exponential backoff with limit
+            if attempts <= retryMaxAttempts:
+                self.logger.debug('pause {} sec then try again'.format(retry))
+                sleep(retry)
+                retry = retry * (1.0 + random())
+                if retry > 32:
+                    retry = 32
 
-        return execution_id
-
-    # @classmethod
-    # def get_client_with_mock_support():
-    #     '''
-    #     Get the current Actor API client
-
-    #     Returns the Abaco actor's client if running deployed. Attempts to
-    #     bootstrap a client from supplied credentials if running in local or
-    #     debug mode.
-    #     '''
-    #     _client = None
-    #     if os.environ.get('_abaco_access_token') is None:
-    #         from agavepy.agave import Agave
-    #         try:
-    #             _client = Agave.restore()
-    #         except TypeError:
-    #             _client = None
-    #     else:
-    #         _client = get_client()
-
-    #     return _client
-
-    # @classmethod
-    # def get_context_with_mock_support():
-    #     '''
-    #     Return the current Actor context
-
-    #     Return the Abaco actor's environment context if running deployed.
-    #     Creates a test context based on inferred or mocked values if running
-    #     in local or debug mode.
-    #     '''
-    #     _context = get_context()
-    #     if os.environ.get('_abaco_actor_id') is None:
-    #         _phony_actor_id = uniqueid.get_id() + '.local'
-    #         __context = AttrDict({'raw_message': os.environ.get('MSG', ''),
-    #                               'content_type': 'application/json',
-    #                               'execution_id': uniqueid.get_id() + '.local',
-    #                               'username': os.environ.get(
-    #                               '_abaco_username'),
-    #                               'state': {},
-    #                               'actor_dbid': _phony_actor_id,
-    #                               'actor_id': _phony_actor_id})
-    #         # Merge new values from __context
-    #         _context.update(__context)
-    #     return _context
+        # Maximum attempts have passed and execution_id was not returned
+        if ignoreErrors:
+            self.logger.error(terminal_err.format(resolved_actor_id,
+                                                  retryMaxAttempts,
+                                                  exceptions))
+        else:
+            raise Exception(terminal_err.format(resolved_actor_id,
+                                                retryMaxAttempts,
+                                                exceptions))
 
     def _get_nonce_vals(self):
         '''Fetch x-nonce if it was passed. Used to set up redaction.'''
