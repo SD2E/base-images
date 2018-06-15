@@ -28,7 +28,7 @@ sys.path.append(os.path.split(os.getcwd())[0])
 # sys.path.append('/reactors')
 # from . import agaveutils, alias, logs,\
 #     loggers, jsonmessages, process, storage, uniqueid
-from . import agaveutils, alias, logtypes,\
+from . import agaveutils, aliases, logtypes,\
     jsonmessages, process, storage, uniqueid
 
 VERSION = '0.6.2'
@@ -176,7 +176,8 @@ class Reactor(object):
         self.uid = self.context.get('actor_id')
         self.execid = self.context.get('execution_id')
         self.state = self.context.get('state')
-        self.aliases = alias.AliasStore(self.client)
+        self.aliases = aliases.store.AliasStore(self.client,
+                                                aliasPrefix='v1-alias-')
         self.aliascache = {}
         self.loggers = AttrDict({'screen': None, 'slack': None})
         self.pemagent = agaveutils.recursive.PemAgent(self.client)
@@ -324,6 +325,32 @@ class Reactor(object):
         env_vars.update(sender_envs)
         return env_vars
 
+    def resolve_identifier(self, text):
+        """
+        Efficiently look up the identifier for a text string
+
+        Positional parameters:
+        text: str - An alias, actorId, appId, or the me/self shortcut
+
+        Returns:
+        identifier: str - The resolved value for text
+
+        On error:
+        Returns value of text
+        """
+
+        if uniqueid.is_hashid(text):
+            return text
+
+        if agaveutils.entity.is_appid(text):
+            return text
+
+        try:
+            result = self.aliases.get_name(text)
+            return result
+        except Exception:
+            return text
+
     def send_message(self, actorId, message,
                      environment={}, ignoreErrors=True,
                      senderTags=True, retryMaxAttempts=MAX_RETRIES,
@@ -350,8 +377,7 @@ class Reactor(object):
         failures raise an Exception to handled by the caller.
         """
 
-        # TODO: Call alias resolver
-        resolved_actor_id = actorId
+        resolved_actor_id = self.resolve_identifier(actorId)
         # Build dynamic list of variables. This is how attributes like
         # session and sender-id are propagated
         environment_vars = self._get_environment(environment, senderTags)

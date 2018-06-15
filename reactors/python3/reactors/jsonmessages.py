@@ -6,7 +6,7 @@ from jsonschema import validate, FormatChecker, ValidationError
 HERE = os.path.dirname(os.path.abspath(__file__))
 PWD = os.getcwd()
 ROOT = '/'
-MESSAGE_SCHEMA = '/message.jsonschema'
+MESSAGE_SCHEMA = os.path.join(HERE, 'message.jsonschema')
 
 
 def _validate_return_bool(object_json, schema_json, permissive=True):

@@ -4,7 +4,7 @@ Functions for working with Agave, HTTP, and TACC S3 URIs
 import re
 import os
 import time
-from agavepy.agave import Agave
+from agavepy.agave import Agave, AgaveError
 
 
 MAX_ELAPSED = 300

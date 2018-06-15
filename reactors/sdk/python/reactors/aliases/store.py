@@ -9,25 +9,27 @@ from __future__ import absolute_import
 from future.standard_library import install_aliases
 install_aliases()
 
-from os import environ
+import os
 import re
+import sys
 
 from past.builtins import basestring
-from agavedb import AgaveKeyValStore
+
+sys.path.insert(0, os.path.dirname(__file__))
+from agavedb.keyval import AgaveKeyValStore, AgaveError
+from agavedb.uniqueid import get_id
 
 PREFIX = 'tacc-alias-'
 
 
 class AliasStore(AgaveKeyValStore):
 
-    @classmethod
-    def _createkey(cls, alias):
+    def _createkey(self, alias):
         '''Creates the internal key name for an alias'''
-        assert alias is not None, "Value for 'alias' cannot be empty"
         # Python2/3 compatible coercion to a "stringy" key name
         if isinstance(alias, bytes):
             alias = str(alias)
-        return PREFIX + alias.lower()
+        return self.alias_prefix + alias.lower()
 
     def rem_alias(self, alias):
         '''Delete an alias from the database'''
@@ -54,28 +56,30 @@ class AliasStore(AgaveKeyValStore):
         alias_key = self._createkey(alias)
         return self.remacl(alias_key, user=username)
 
-    # def get_name(self, alias):
-    #     '''Get a speciifc alias => entity name'''
-    #     alias_key = self._createkey(alias)
-    #     return self.get(alias_key)
-
     def get_name(self, alias):
-        """Get a speciifc alias => entity name
+        """Get a speciifc alias => entity mapping
 
         Implements a 'me' alias to return self
         """
-        if alias == 'me':
-            alias_key = environ.get('_abaco_actor_id', None)
-            if alias_key is not None:
+        if alias.lower() == 'me' or alias.lower() == 'self':
+            # Precedence: Abaco actorId then Agave appId
+            appid = os.environ.get('AGAVE_APP_ID', None)
+            alias_key = os.environ.get('_abaco_actor_id', appid)
+            if alias_key is not None and alias_key != '':
                 return alias_key
+            else:
+                raise ValueError("Failed to resolve {}".format(alias))
 
-        alias_key = self._createkey(alias)
-        return self.get(alias_key)
+        try:
+            return self.get(self._createkey(alias))
+        except ValueError as e:
+            raise ValueError("Failed to look up alias {}: {}".format(
+                alias, e))
 
-    def get_aliases(self, sorted=True):
+    def get_aliases(self, sort_aliases=True):
         '''Fetch all aliases as a alphabetically-sorted list'''
-        all_keys = self.getall(sorted=sorted)
-        pattern = to_unicode('^' + PREFIX)
+        all_keys = self.getall(sort_aliases=sort_aliases)
+        pattern = to_unicode('^' + self.alias_prefix)
         matched_keys = []
         KEYPREFIX = re.compile(pattern, re.UNICODE)
         for k in all_keys:
@@ -84,9 +88,15 @@ class AliasStore(AgaveKeyValStore):
                 # if isinstance(alias, bytes):
                 #     alias = str(alias)
                 matched_keys.append(re.sub(KEYPREFIX, '', k))
-        if sorted is True:
+        if sort_aliases is True:
             matched_keys.sort()
+
         return matched_keys
+
+    def rem_all_aliases(self):
+        '''Removes all aliases owned by current user'''
+        all_keys = self.deldb()
+        return all_keys
 
 
 def to_unicode(input):
