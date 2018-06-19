@@ -6,6 +6,7 @@ ARG LANGUAGE=python2
 
 ARG AGAVEPY_BRANCH=develop
 ARG PYTHON_PIP_VERSION=9.0.3
+ADD files/pip.conf /etc/pip.conf
 
 RUN apk add --update alpine-sdk musl python python-dev py-pip && \
     rm /var/cache/apk/*
@@ -14,4 +15,4 @@ RUN pip install --upgrade pip==${PYTHON_PIP_VERSION}
 RUN pip install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 ADD requirements-${CHANNEL}.txt /requirements.txt
-RUN pip install --upgrade --no-cache-dir --upgrade -r /requirements.txt
+RUN pip install --upgrade -r /requirements.txt

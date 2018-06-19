@@ -12,5 +12,4 @@ pytz>=2017.2
 urllib3>=1.22
 agavepy>=0.7.0
 tacconfig>=0.5.2
-# agavedb>=0.4.2
-logstash_formatter>=0.5.17
+validators>=0.12.2

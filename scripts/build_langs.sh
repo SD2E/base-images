@@ -19,9 +19,10 @@ if [ "${RELEASE}" != "stable" ]; then
     CHANNEL="${RELEASE}"
 fi
 
-if [ ! -z "${LANGUAGE}" ]
-then
-    LANGVERSIONS="${LANGUAGE}"
+if [ "$LANGUAGE" == "python" ]; then
+    LANGVERSIONS="python2 python3"
+elif [ ! -z "$LANGUAGE" ]; then
+    LANGVERSIONS=${LANGUAGE}
 else
     LANGVERSIONS="python2 python3 java8"
 fi
