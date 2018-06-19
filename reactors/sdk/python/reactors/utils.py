@@ -3,14 +3,17 @@ Utility library for building TACC Reactors
 """
 from __future__ import absolute_import
 
-import os
-import sys
 import datetime
-from time import sleep
-from random import random
-
+import json
+import os
 import petname
 import pytz
+import re
+import sys
+import validators
+
+from time import sleep
+from random import random
 
 from attrdict import AttrDict
 from agavepy.actors import get_context
@@ -167,8 +170,10 @@ def read_config(namespace=NAMESPACE, places_list=CONFIG_LOCS,
 
 
 class Reactor(object):
-    '''Utility object for working with the Actors API and execution environment'''
-    def __init__(self):
+    """
+    Helper class providing a client-side API for the Actors service
+    """
+    def __init__(self, redactions=[]):
         self.nickname = petname.Generate(2, '-')
         self.client = get_client_with_mock_support()
         self.context = get_context_with_mock_support(agave_client=self.client)
@@ -178,27 +183,26 @@ class Reactor(object):
         self.state = self.context.get('state')
         self.aliases = aliases.store.AliasStore(self.client,
                                                 aliasPrefix='v1-alias-')
-        self.aliascache = {}
+#        self.aliascache = {}
         self.loggers = AttrDict({'screen': None, 'slack': None})
         self.pemagent = agaveutils.recursive.PemAgent(self.client)
 
-        # a session in this context is a linked set of executions
-        # that inherit an id from their parent. if a reactor doesn't
-        # have a session, it creates one from its nickname.
+        # A session in the Reactors context is a linked set of executions
+        # that inherit an identifier from their parent. If a reactor doesn't
+        # detect a session on init, it creates one from its nickname.
         self.session = self.context.get('x_session',
                                         self.context.get(
                                             'SESSION',
                                             self.nickname))
 
-        # abaco injects the requester's username into context
-        #
-        # if it's not present, we assume the code is running under
-        # local emulation or just inside a unit test - poll the profiles
-        # service to get the username, a slow but reliabe operation
+        # Abaco injects the requester's username into context. If it's not
+        # present, we assume the code is running under local emulation or j
+        # inside a unit test. Bootstrap by polling the profiles
+        # service to get username, a slow but reliabe operation.
         _username = self.context.get('username', None)
         if (_username is None) or (_username == ''):
             try:
-                # username is a private attribut of client in testing mode
+                # In testing mode, username is a private attribute of client
                 _username = self.client.profiles.get()['username']
             except Exception:
                 _username = 'none'
@@ -216,25 +220,33 @@ class Reactor(object):
                                     places_list=CONFIG_LOCS,
                                     update=True,
                                     env=True)
-        # self.settings = config.read_config(namespace=NAMESPACE,
-        #                                    places_list=CONFIG_LOCS,
-        #                                    update=True,
-        #                                    env=True)
 
-        # list of text strings to redact in all logs - in this case, all
-        # variables passed in as env overrides since we assume those are
-        # intended to be secret (or at least not easily discoverable).
-        try:
-            envstrings = config.get_env_config_vals(namespace=NAMESPACE)
-            if self._token is not None:
-                if len(self._token) > 3:
-                    envstrings.append(self._token)
-        except Exception:
-            envstrings = []
-        # add in nonce to the redact list via some heuristic measures
+        # Build up a list of text strings to redact in logs. We start with
+        # redaction passed at init, then append values of any varable passed
+        # as a tacconfig environment variable override. The assumption is that
+        # such variables are probably sensitive if not outright secret and
+        # should thus not be easily discoverable.
+        #
+        # TODO - Integrate this with the eventual TACC secrets API
+        # TODO - Break out into a function to support unit testing
+        envstrings = []
+        if len(redactions) > 0 and isinstance(redactions, list):
+            envstrings = redactions
+        # The Oauth access token
+        if len(self._token) > 3:
+            envstrings.append(self._token)
+        # Add nonce values to the redact list
         envstrings.extend(self._get_nonce_vals())
+        # Pull in taccconfig environment overrides
+        try:
+            env_config_vals = config.get_env_config_vals(namespace=NAMESPACE)
+        except Exception:
+            env_config_vals = []
+        envstrings.extend(env_config_vals)
+        # remove duplicates
+        envstrings = list(set(envstrings))
 
-        # Set up logger instances
+        # Set up loggers
 
         # Dict of fields that we want to send with each logstash
         # structured log response
@@ -295,18 +307,24 @@ class Reactor(object):
                 return default_attr
 
     def on_success(self, successMessage="Success"):
-        '''Log message and exit 0'''
+        """
+        Log message and exit 0
+        """
         self.logger.info(successMessage)
         sys.exit(0)
 
     def on_failure(self, failMessage="Failure", exceptionObject=None):
-        '''Log message and exception and exit 1'''
+        """
+        Log message and exit 0
+        """
         self.logger.critical("{} : {}".format(
             failMessage, exceptionObject))
         sys.exit(1)
 
     def _make_sender_tags(self, senderTags=True):
-        """Private method for passing along provenance variables"""
+        """
+        Internal function for capturing actor and app provenance attributes
+        """
         sender_envs = {}
         if senderTags is True:
             for env in list(SPECIAL_VARS_MAP.keys()):
@@ -319,7 +337,9 @@ class Reactor(object):
 
     def _get_environment(self, passed_envs={},
                          sender_envs={}, senderTags=True):
-        """Private method to merge user- and platform-specific envs"""
+        """
+        Private method to merge user- and platform-specific environments
+        """
         env_vars = passed_envs
         sender_envs = self._make_sender_tags(senderTags)
         env_vars.update(sender_envs)
@@ -327,7 +347,7 @@ class Reactor(object):
 
     def resolve_identifier(self, text):
         """
-        Efficiently look up the identifier for a text string
+        Efficiently look up the identifier for a alias string
 
         Positional parameters:
         text: str - An alias, actorId, appId, or the me/self shortcut
@@ -337,6 +357,9 @@ class Reactor(object):
 
         On error:
         Returns value of text
+
+        Notes: Does basic optimization of returning an app ID or abaco actorId
+        if they are passed, as we can safely assume those are not aliases.
         """
 
         if uniqueid.is_hashid(text):
@@ -345,6 +368,8 @@ class Reactor(object):
         if agaveutils.entity.is_appid(text):
             return text
 
+        # TODO - Implement a cache of looked-up values, assuming they are
+        # very unlikely to change during the course of a single execution
         try:
             result = self.aliases.get_name(text)
             return result
@@ -386,18 +411,15 @@ class Reactor(object):
         attempts = 0
         execution_id = None
         exceptions = []
-        httperror = '{}: {}; message: {}; status: {}; version: {}'
         noexecid_err = 'Response received from {} but no executionId was found'
         exception_err = 'Exception encountered messaging {}'
         terminal_err = 'Message to {} failed after {} tries with errors: {}'
 
+        self.logger.info("message.to: {}".format(actorId))
+        self.logger.debug("message.body: {}".format(message))
+
         while attempts <= retryMaxAttempts:
-
             try:
-
-                self.logger.info("message.to: {}".format(actorId))
-                self.logger.debug("message.body: {}".format(message))
-
                 response = self.client.actors.sendMessage(
                     actorId=resolved_actor_id,
                     body={'message': message},
@@ -414,52 +436,9 @@ class Reactor(object):
                     self.logger.error(
                         noexecid_err.format(resolved_actor_id))
 
-            # TODO - Generalize to process all TACC.cloud HTTP errors
             except HTTPError as h:
-
-                exceptions.append(h)
-                # extract HTTP response code
-                code = -1
-                try:
-                    code = h.response.status_code
-                    assert isinstance(code, int)
-                except Exception:
-                    # we have no idea what the hell happened
-                    code = 418
-
-                # extract HTTP reason
-                reason = 'UNKNOWN ERROR'
-                try:
-                    reason = h.response.reason
-                except Exception:
-                    pass
-
-                # Extract textual response elements
-                #
-                # agave and abaco will give json responses if the
-                # underlying service is at all capable of doing so
-                # so try to extract fields from it if we can.
-                #
-                # otherwise, return the actual text of the response
-                # in error message
-                err_msg = 'Unexpected encountered by the web service'
-                status_msg = 'error'
-                version_msg = 'unknown'
-                try:
-                    j = h.response.json()
-                    if 'message' in j:
-                        err_msg = j['message']
-                    if 'status' in j:
-                        status_msg = j['status']
-                    if 'version' in j:
-                        version_msg = j['version']
-                except Exception:
-                    err_msg = h.response.text
-
-                httperror = '{}: {}; message: {}; status: {}; version: {}'
-                self.logger.error(httperror.format(code, reason,
-                                                   err_msg, status_msg,
-                                                   version_msg))
+                http_err_resp = agaveutils.process_agave_httperror(h)
+                self.logger.error(http_err_resp)
 
             # This should only happen in egregious circumstances
             # since the vast majority of AgavePy error manifest as
@@ -487,17 +466,6 @@ class Reactor(object):
                                                 retryMaxAttempts,
                                                 exceptions))
 
-    def _get_nonce_vals(self):
-        '''Fetch x-nonce if it was passed. Used to set up redaction.'''
-        nonce_vals = []
-        try:
-            nonce_value = self.context.get('x-nonce', None)
-            if nonce_value is not None:
-                nonce_vals.append(nonce_value)
-        except Exception:
-            pass
-        return nonce_vals
-
     def validate_message(self,
                          messagedict,
                          messageschema=MESSAGE_SCHEMA,
@@ -515,6 +483,216 @@ class Reactor(object):
         return jsonmessages.validate_message(messagedict,
                                              messageschema=MESSAGE_SCHEMA,
                                              permissive=permissive)
+
+    def create_webhook(self, permission='READ', maxuses=-1, actorId=None):
+        """
+        Create a .actor.messages URI suitable for use in integrations
+        """
+        if actorId is not None:
+            _actorId = actorId
+        else:
+            _actorId = self.uid
+
+        try:
+            api_server = agaveutils.utils.get_api_server(self.client)
+            nonce = self.add_nonce(permission,
+                                   maxuses, actorId=_actorId)
+            nonce_id = nonce.get('id')
+            uri = '{}/actors/v2/{}/messages?x-nonce={}'.format(
+                api_server, _actorId, nonce_id)
+            if validators.url(uri):
+                return uri
+            else:
+                raise ValueError("Webhook URI {} is not valid".format(uri))
+        except HTTPError as h:
+            http_err_resp = agaveutils.process_agave_httperror(h)
+            raise Exception(http_err_resp)
+        except Exception as e:
+            raise Exception(
+                "Unknown error: {}".format(e))
+
+    def delete_webhook(self, webhook, actorId=None):
+        """
+        'Delete' an actor-specific webhook by deleting its nonce
+
+        A key assumption is that webhook was constructed by create_webhook or
+        its equivalent, as this method sensitive to case and url structure
+        """
+        if actorId is not None:
+            _actorId = actorId
+        else:
+            _actorId = self.uid
+
+        # webhook must be plausibly associated with the specified actor
+        if not re.search('/actors/v2/{}'.format(_actorId), webhook):
+            raise ValueError("URI doesn't map to actor {}".format(_actorId))
+
+        try:
+            m = re.search('x-nonce=([A-Z0-9a-z\\.]+_[A-Z0-9a-z]+)', webhook)
+            nonce_id = m.groups(0)[0]
+            self.delete_nonce(nonceId=nonce_id, actorId=_actorId)
+        except HTTPError as h:
+            http_err_resp = agaveutils.process_agave_httperror(h)
+            raise Exception(http_err_resp)
+        except Exception as e:
+            raise Exception(
+                "Unknown error: {}".format(e))
+
+    def add_nonce(self, permission='READ', maxuses=1, actorId=None):
+        """
+        Add a new nonce.
+
+        Positional arguments:
+        None
+
+        Keyword arguments:
+        username: str - a valid TACC.cloud username or role account
+        permission: str - a valid Abaco permission level
+        maxuses: int (-1,inf) - maximum number of uses for a given nonce
+        actorId: str - an Abaco actor ID. Defaults to self.uid if not set.
+        """
+        assert permission in ('READ', 'EXECUTE', 'UPDATE'), \
+            'Invalid permission: (READ, EXECUTE, UPDATE)'
+        assert isinstance(maxuses, int), 'Invalid max_uses: (-1,-inf)'
+        assert maxuses >= -1, 'Invalid max_uses: (-1,-inf)'
+        if actorId:
+            _actorId = actorId
+        else:
+            _actorId = self.uid
+
+        try:
+            body = {'level': permission,
+                    'maxUses': maxuses}
+            resp = self.client.actors.addNonce(actorId=_actorId,
+                                               body=json.dumps(body))
+            return resp
+        except HTTPError as h:
+            http_err_resp = agaveutils.process_agave_httperror(h)
+            raise Exception(http_err_resp)
+        except Exception as e:
+            raise Exception(
+                "Unknown error: {}".format(e))
+
+    def get_nonce(self, nonceId, actorId=None):
+        """
+        Get an specific nonce by its ID
+
+        Positional arguments:
+        nonceId: str - a valid TACC.cloud username or role account
+
+        Keyword arguments:
+        actorId: str - an Abaco actor ID. Defaults to self.uid if not set.
+        """
+        if actorId:
+            _actorId = actorId
+        else:
+            _actorId = self.uid
+
+        try:
+            resp = self.client.actors.getNonce(
+                actorId=_actorId, nonceId=nonceId)
+            return resp
+        except HTTPError as h:
+            http_err_resp = agaveutils.process_agave_httperror(h)
+            raise Exception(http_err_resp)
+        except Exception as e:
+            raise Exception(
+                "Unknown error: {}".format(e))
+
+    def delete_nonce(self, nonceId, actorId=None):
+        """
+        Delete an specific nonce by its ID
+
+        Positional arguments:
+        nonceId: str - a valid TACC.cloud username or role account
+
+        Keyword arguments:
+        actorId: str - an Abaco actor ID. Defaults to self.uid if not set.
+        """
+        if actorId:
+            _actorId = actorId
+        else:
+            _actorId = self.uid
+
+        try:
+            resp = self.client.actors.deleteNonce(
+                actorId=_actorId, nonceId=nonceId)
+            return resp
+        except HTTPError as h:
+            http_err_resp = agaveutils.process_agave_httperror(h)
+            raise Exception(http_err_resp)
+        except Exception as e:
+            raise Exception(
+                "Unknown error: {}".format(e))
+
+    def list_nonces(self, actorId=None):
+        """
+        List all nonces
+
+        Positional arguments:
+        None
+
+        Keyword arguments:
+        actorId: str - an Abaco actor ID. Defaults to self.uid if not set.
+        """
+        if actorId:
+            _actorId = actorId
+        else:
+            _actorId = self.uid
+
+        try:
+            resp = self.client.actors.listNonces(
+                actorId=_actorId)
+            return resp
+        except HTTPError as h:
+            http_err_resp = agaveutils.process_agave_httperror(h)
+            raise Exception(http_err_resp)
+        except Exception as e:
+            raise Exception(
+                "Unknown error: {}".format(e))
+
+    def delete_all_nonces(self, actorId=None):
+        """
+        Delete all nonces from an actor
+
+        Keyword arguments:
+        actorId: str - an Abaco actor ID. Defaults to self.uid if not set.
+        """
+        if actorId:
+            _actorId = actorId
+        else:
+            _actorId = self.uid
+
+        try:
+            nonces = self.list_nonces(actorId=_actorId)
+            assert isinstance(nonces, list)
+            for nonce in nonces:
+                self.delete_nonce(nonce.get('id'), actorId=_actorId)
+        except HTTPError as h:
+            http_err_resp = agaveutils.process_agave_httperror(h)
+            raise Exception(http_err_resp)
+        except Exception as e:
+            raise Exception(
+                "Unknown error: {}".format(e))
+
+    def _get_nonce_vals(self):
+        """
+        Get nonce value from environment
+
+        Details: Extract value of x-nonce if it was passed. This is used to
+        set up redaction, but could also be used to pass the nonce along to
+        another context. Currently, we only expect one nonce, but there
+        could be nonces from other services so this is implemented to return
+        a list of nonce values.
+        """
+        nonce_vals = []
+        try:
+            nonce_value = self.context.get('x-nonce', None)
+            if nonce_value is not None:
+                nonce_vals.append(nonce_value)
+        except Exception:
+            pass
+        return nonce_vals
 
 
 def utcnow():
