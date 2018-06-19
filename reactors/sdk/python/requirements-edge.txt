@@ -15,7 +15,3 @@ urllib3>=1.22
 ####################
 agavepy>=0.7.0
 tacconfig>=0.5.2
-<<<<<<< HEAD
-# agavedb>=0.4.2
-=======
->>>>>>> develop
