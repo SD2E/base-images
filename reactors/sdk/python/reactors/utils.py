@@ -233,8 +233,11 @@ class Reactor(object):
         if len(redactions) > 0 and isinstance(redactions, list):
             envstrings = redactions
         # The Oauth access token
-        if len(self._token) > 3:
-            envstrings.append(self._token)
+        try:
+            if len(self._token) > 3:
+                envstrings.append(self._token)
+        except Exception:
+            pass
         # Add nonce values to the redact list
         envstrings.extend(self._get_nonce_vals())
         # Pull in taccconfig environment overrides

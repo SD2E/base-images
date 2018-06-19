@@ -1,5 +1,5 @@
 #####################
-# reactors and apps #
+# Reactors SDKs     #
 #####################
 AttrDict>=2.0.0
 PyYAML>=3.12
@@ -10,6 +10,8 @@ petname>=2.2
 python-jsonschema-objects==0.3.1
 pytz>=2017.2
 urllib3>=1.22
+####################
+# TACC-maintained  #
+####################
 agavepy>=0.7.0
 tacconfig>=0.5.2
-validators>=0.12.2
