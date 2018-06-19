@@ -60,7 +60,5 @@ reactors: reactors-build
 	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE)
 
 reactors-edge:
-	cd reactors/python2 && make sdk
-	cd reactors/python3 && make sdk
 	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) edge build python
 	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) edge release python

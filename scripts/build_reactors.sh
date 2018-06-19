@@ -48,6 +48,9 @@ do
         echo "Building ${TENANT_DOCKER_ORG}/reactors:${VERSION}"
         cd ${DIR}/../reactors/${VERSION}
 
+        # Each reactors version has a Makefile where all does requisite setup
+        make all
+
         DOCKERFILE="Dockerfile${CHANNELTAG}"
         if [ "${CHANNELTAG}" != "stable" ] && [ ! -f "$DOCKERFILE" ]; then
             echo "$DOCKERFILE for channel ${CHANNELTAG} not found. Using stable version."

@@ -6,7 +6,8 @@ ARG LANGUAGE=python2
 ARG BASE=ubuntu18
 
 ARG AGAVEPY_BRANCH=develop
-ARG PYTHON_PIP_VERSION="9.0.3"
+ARG PYTHON_PIP_VERSION=9.0.3
+ADD files/pip.conf /etc/pip.conf
 
 RUN apt-get -y update && \
     apt-get -y install build-essential \
@@ -21,4 +22,4 @@ RUN pip install --upgrade pip==${PYTHON_PIP_VERSION}
 RUN pip install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 ADD requirements-${CHANNEL}.txt /requirements.txt
-RUN pip install --upgrade --no-cache-dir --upgrade -r /requirements.txt
+RUN pip install --upgrade -r /requirements.txt
