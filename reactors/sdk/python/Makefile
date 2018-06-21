@@ -10,7 +10,7 @@ sdk: sdk-clean
 shell:
 	bash tests/run-container-tests.sh bash
 
-tests:
+tests: clean sdk
 	bash tests/run-container-tests.sh pytest ${PYTESTOPTS}
 
 sdk-clean:

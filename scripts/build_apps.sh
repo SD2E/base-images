@@ -19,10 +19,9 @@ if [ "${RELEASE}" != "stable" ]; then
     CHANNEL="${RELEASE}"
 fi
 
-if [ "$LANGUAGE" == "python" ]; then
-    LANGVERSIONS="python2 python3"
-elif [ ! -z "$LANGUAGE" ]; then
-    LANGVERSIONS=${LANGUAGE}
+if [ ! -z "${LANGUAGE}" ]
+then
+    LANGVERSIONS="${LANGUAGE}"
 else
     LANGVERSIONS="python2 python3"
 fi
@@ -31,7 +30,7 @@ if [ ! -z "${DIST}" ]
 then
     DISTVERSIONS="${DIST}"
 else
-    DISTVERSIONS="ubuntu16 ubuntu17 miniconda"
+    DISTVERSIONS="ubuntu16 ubuntu17"
 fi
 
 echo "** CONFIG **"
@@ -57,11 +56,7 @@ do
             fi
 
             if [ -f "${DOCKERFILE}" ]; then
-                REPOTAG=${LANG}
-                if [ "${VERSION}" == "miniconda" ]; then
-                    REPOTAG="${REPOTAG}-${VERSION}"
-                fi
-                bash $DIR/docker_helper.sh "${TENANT_DOCKER_ORG}/apps" "${REPOTAG}${CHANNELTAG}" "${DOCKERFILE}" "${COMMAND}"
+                bash $DIR/docker_helper.sh "${TENANT_DOCKER_ORG}/apps" "${LANG}${CHANNELTAG}" "${DOCKERFILE}" "${COMMAND}"
             else
                 echo "${DOCKERFILE} not found. Skipped."
             fi

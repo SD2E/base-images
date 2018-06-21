@@ -41,7 +41,7 @@ languages-build:
 languages: languages-build
 	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE) $(BASE)
 
-apps-build:
+apps-build: languages-build
 	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
 
 apps: apps-build

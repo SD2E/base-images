@@ -11,7 +11,6 @@ ARG SCRATCH=/mnt/ephemeral-01
 RUN echo "TACC.cloud Reactors\nLanguage: ${LANGUAGE}\nVersion: ${VERSION}" > /etc/reactors-VERSION
 # Helpful env variable
 ENV REACTORS_VERSION=${VERSION}
-ENV SCRATCH=${SCRATCH}
 
 # This is a container-local directory
 # that all UIDs can write to. It will

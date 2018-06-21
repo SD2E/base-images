@@ -20,13 +20,11 @@ if [ "${RELEASE}" != "stable" ]; then
 fi
 
 if [ "$LANGUAGE" == "python" ]; then
-    LANGVERSIONS="python2 python3 python2-miniconda python3-miniconda"
-elif [ "$LANGUAGE" == "miniconda" ]; then
-    LANGVERSIONS="python2-miniconda python3-miniconda"
+    LANGVERSIONS="python2 python3"
 elif [ ! -z "$LANGUAGE" ]; then
     LANGVERSIONS=${LANGUAGE}
 else
-    LANGVERSIONS="python2 python3 python2-miniconda python3-miniconda java8 bash ruby golang"
+    LANGVERSIONS="python2 python3 java8 bash ruby golang"
 fi
 
 if [ ! -z "$DIST" ]

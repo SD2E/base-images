@@ -11,7 +11,7 @@ this arrangement.
 
 |                base                |                     languages                    |                apps               |                         reactors                         |
 |:----------------------------------:|:------------------------------------------------:|:---------------------------------:|:--------------------------------------------------------:|
-| alpine36 centos7 miniconda2 miniconda3 ubuntu16 ubuntu17 | ubuntu16/python2 ubuntu17/python3 ubuntu17/java8 | python2/ubuntu16 python3/ubuntu17 | python2/ubuntu16 python2-conda/ubuntu16 python3/ubuntu17 |
+| alpine36 centos7 miniconda3 ubuntu16 ubuntu17 | ubuntu16/python2 ubuntu17/python3 ubuntu17/java8 | python2/ubuntu16 python3/ubuntu17 | python2/ubuntu16 python2-conda/ubuntu16 python3/ubuntu17 |
 
 ## Architecture
 

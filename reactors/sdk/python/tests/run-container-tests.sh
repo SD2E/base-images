@@ -28,13 +28,11 @@ COMMANDS="$@"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$DIR/common.sh"
-WD=${PWD}
 
 # CONTAINER_IMAGE="python3-test-mwv"
-cd ../
 CONTAINER_IMAGE="$(basename $(dirname ${DIR}))-$(date +%s)"
+
 docker build -t $CONTAINER_IMAGE .
-cd $WD
 
 # Api integration
 AGAVE_CREDS="${AGAVE_CACHE_DIR}"
