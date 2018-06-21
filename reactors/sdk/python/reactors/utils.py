@@ -487,11 +487,9 @@ class Reactor(object):
                                              messageschema=MESSAGE_SCHEMA,
                                              permissive=permissive)
 
-    def create_webhook(self, permission='EXECUTE', maxuses=-1, actorId=None):
+    def create_webhook(self, permission='READ', maxuses=-1, actorId=None):
         """
         Create a .actor.messages URI suitable for use in integrations
-
-        Default is to grant EXECUTE with unlimited uses.
         """
         if actorId is not None:
             _actorId = actorId
