@@ -1,0 +1,15 @@
+---
+logger:
+  client_key: F3VRMUNrPeaq84zp
+  path: /logger
+  proto: http
+  host: logger.sd2e.org
+  port: 31311
+  uri: "http://logger.sd2e.org:31311"
+logs:
+  level: DEBUG
+  file: ~
+  token: ~
+slack:
+  channel: "notifications"
+  webhook: ~
