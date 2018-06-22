@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "AbacoMessageSQS",
+    "description": "An AWS-like SQS notification",
+    "type": "object",
+    "properties": {
+        "Key": {
+            "type": "string",
+            "format": "uri",
+            "description": "An object-store equivalent to a file path."
+        }
+    },
+    "required": ["Key"]
+}

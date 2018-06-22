@@ -1,0 +1,41 @@
+[{
+        "schema": "AbacoMessage.json",
+        "object": {
+            "key": "value"
+        },
+        "validates": true
+    },
+    {
+        "schema": "AbacoMessage.json",
+        "object": [{
+            "key": "value"
+        }],
+        "validates": false
+    },
+    {
+        "schema": "AbacoMessage.json",
+        "object": [],
+        "valid": false
+    },
+    {
+        "schema": "AbacoMessage.json",
+        "object": {},
+        "validates": true
+    },
+    {
+        "schema": "AbacoMessageEmail.json",
+        "object": {
+            "to": "scotty@enterprise.space",
+            "subject": "Hello, computer.",
+            "body": "A keyboard... how quaint."
+        },
+        "validates": true
+    },
+    {
+        "schema": "AbacoMessageSQS.json",
+        "object": {
+            "Key": "s3://sd2e-community/ingest/testing/biofab/yeast-gates_q0/3/manifest/107795-manifest.json"
+        },
+        "validates": true
+    }
+]

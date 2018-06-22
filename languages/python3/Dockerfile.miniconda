@@ -2,7 +2,7 @@ FROM sd2e/base:miniconda3
 LABEL ORG=sd2e.org IMAGE=python3
 
 ARG CHANNEL=stable
-ARG LANGUAGE=python3
+ARG LANGUAGE=python3-miniconda
 ARG BASE=miniconda3
 
 ARG AGAVEPY_BRANCH=develop

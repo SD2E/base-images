@@ -1,0 +1,17 @@
+# This is a placeholder config.yml file to demonstrate that
+# automatic config reading and OBBUILD support works
+---
+key1: value1
+logs:
+  file: ~
+  level: DEBUG
+  token: ~
+noredact: "Hello there, insenstive data."
+redact: "Hello there, sensitive data!"
+slack:
+  channel: notifications
+  icon_emoji: ":atom_symbol:"
+  username: reactor-bot
+  webhook: ~
+logger:
+  path: /logger/reactors
