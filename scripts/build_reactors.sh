@@ -50,9 +50,6 @@ do
         echo "Building ${TENANT_DOCKER_ORG}/reactors:${VERSION}"
         cd ${DIR}/../reactors/${VERSION}
 
-        # Each reactors version has a Makefile where all does requisite setup
-        make all
-
         DOCKERFILE="Dockerfile${CHANNELTAG}"
         if [ "${CHANNELTAG}" != "stable" ] && [ ! -f "$DOCKERFILE" ]; then
             echo "$DOCKERFILE for channel ${CHANNELTAG} not found. Using stable version."
@@ -60,11 +57,15 @@ do
         fi
 
         if [ -f "${DOCKERFILE}" ]; then
+            # Each reactors build has a Makefile to set up pre-reqs needed by Dockerfile
+            make all
             bash $DIR/docker_helper.sh "${TENANT_DOCKER_ORG}/reactors" "${VERSION}${CHANNELTAG}" "${DOCKERFILE}" "${COMMAND}"
+            make clean
             cd $DIR/../reactors
         else
             echo "${DOCKERFILE} for ${VERSION} not found. Skipped."
         fi
+
     else
         echo "${VERSION} not found. Skipped."
     fi

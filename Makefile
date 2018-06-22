@@ -62,3 +62,13 @@ reactors: reactors-build
 reactors-edge:
 	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) edge build python
 	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) edge release python
+
+reactors-clean:
+	cd reactors/python2 ; \
+	make clean
+	cd reactors/python3 ; \
+	make clean
+	cd reactors/python2-miniconda ; \
+	make clean
+	cd reactors/python3-miniconda ; \
+	make clean

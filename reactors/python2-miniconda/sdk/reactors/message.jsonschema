@@ -1,7 +1,0 @@
-{
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "$id": "https://sd2e.github.io/reactors-user-guide/schemas/message.json",
-    "title": "AbacoMessage",
-    "description": "Generic Abaco JSON message",
-    "type": "object"
-}

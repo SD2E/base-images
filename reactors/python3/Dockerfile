@@ -2,7 +2,7 @@ FROM sd2e/python3:ubuntu17
 
 ARG CHANNEL=edge
 ARG LANGUAGE=python3
-ARG VERSION=0.7.0
+ARG VERSION=0.7.5
 ARG AGAVEPY_BRANCH=develop
 ARG SCRATCH=/mnt/ephemeral-01
 

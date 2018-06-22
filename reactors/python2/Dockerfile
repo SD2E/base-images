@@ -2,7 +2,7 @@ FROM sd2e/python2:ubuntu16
 
 ARG CHANNEL=stable
 ARG LANGUAGE=python2
-ARG VERSION=0.7.0
+ARG VERSION=0.7.5
 ARG AGAVEPY_BRANCH=develop
 ARG AGAVEDB_BRANCH=develop
 ARG SCRATCH=/mnt/ephemeral-01
