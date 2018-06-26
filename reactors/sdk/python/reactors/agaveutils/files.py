@@ -23,8 +23,7 @@ def get(agaveClient, agaveAbsolutePath, systemId, localFilename,
     :param agaveAbsolutePath: absolute path to file
     :param systemId: storageSystem where file resides
     :param localFilename: destination file name
-    :param retries: number of times to attempt download
-    :param retries: number of times to attempt download
+    :param retries: number of times to attempt get
     :param delay: initial delay before making another attempt
     :param multiplier: multiplier for delay
     :raises: HTTPError, AgaveError
@@ -46,6 +45,42 @@ def get(agaveClient, agaveAbsolutePath, systemId, localFilename,
                 pause = pause * multiplier
             else:
                 raise
+
+
+def mkdir(agaveClient, dirName, systemId, basePath='/',
+          retries=MAX_RETRIES, delay=DELAY, multiplier=MULTIPLIER):
+    """files-mkdir with retry and exponential backoff
+
+    :param agaveClient: an authenticated Agave object
+    :param dirName: name/path of new directory
+    :param systemId: storageSystem for directory creation
+    :param basePath: absolute path to parent directory
+    :param retries: number of times to attempt mkdir
+    :param delay: initial delay before making another attempt
+    :param multiplier: multiplier for delay
+    :raises: HTTPError, AgaveError
+    """
+    attempt = 0
+    pause = delay
+    while attempt <= retries:
+        try:
+            agave_mkdir(agaveClient,
+                        dirName,
+                        systemId,
+                        basePath)
+            return True
+        except Exception:
+            if attempt < retries:
+                attempt = attempt + 1
+                time.sleep(pause)
+                pause = pause * multiplier
+            else:
+                raise
+
+
+def put(agaveClient, agaveDestPath, systemId, uploadFile,
+        retries=MAX_RETRIES, delay=DELAY, multiplier=MULTIPLIER):
+    pass
 
 
 def process_agave_httperror(http_error_object):
