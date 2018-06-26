@@ -5,13 +5,47 @@ import os
 import re
 import time
 from random import random
-from agavepy.agave import Agave
+from agavepy.agave import Agave, AgaveError
 from requests.exceptions import HTTPError
-
 
 PWD = os.getcwd()
 MAX_ELAPSED = 300
 MAX_RETRIES = 5
+DELAY = 1
+MULTIPLIER = 2
+
+
+def get(agaveClient, agaveAbsolutePath, systemId, localFilename,
+        retries=MAX_RETRIES, delay=DELAY, multiplier=MULTIPLIER):
+    """files-get with retry and exponential backoff
+
+    :param agaveClient: an authenticated Agave object
+    :param agaveAbsolutePath: absolute path to file
+    :param systemId: storageSystem where file resides
+    :param localFilename: destination file name
+    :param retries: number of times to attempt download
+    :param retries: number of times to attempt download
+    :param delay: initial delay before making another attempt
+    :param multiplier: multiplier for delay
+    :raises: HTTPError, AgaveError
+    """
+
+    attempt = 0
+    pause = delay
+    while attempt <= retries:
+        try:
+            f = agave_download_file(agaveClient,
+                                    agaveAbsolutePath,
+                                    systemId,
+                                    localFilename)
+            return f
+        except Exception:
+            if attempt < retries:
+                attempt = attempt + 1
+                time.sleep(pause)
+                pause = pause * multiplier
+            else:
+                raise
 
 
 def process_agave_httperror(http_error_object):
