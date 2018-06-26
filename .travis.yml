@@ -40,7 +40,6 @@ deploy:
       - master
       - develop
 
-
 after_deploy:
   - bash ./scripts/trigger-travis.sh sd2e base-images-custom ${TRAVIS_ACCESS_TOKEN}
   on:
