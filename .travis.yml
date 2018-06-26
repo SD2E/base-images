@@ -40,13 +40,15 @@ deploy:
       - master
       - develop
 
-jobs:
-  include:
-    - stage: trigger downstream
-      jdk: oraclejdk8
-      script: |
-        echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
-        if [[ ($TRAVIS_BRANCH == master) &&
-              ($TRAVIS_PULL_REQUEST == false) ]] ; then
-          bash scripts/trigger-travis.sh sd2e base-images-custom $TRAVIS_ACCESS_TOKEN
-        fi
+after_deploy:
+  provider: script
+  script: |
+    echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
+    if [[ ($TRAVIS_BRANCH == master) &&
+          ($TRAVIS_PULL_REQUEST == false) ]] ; then
+      bash scripts/trigger-travis.sh sd2e base-images-custom $TRAVIS_ACCESS_TOKEN
+    fi
+  on:
+    branch:
+      - master
+      - develop
