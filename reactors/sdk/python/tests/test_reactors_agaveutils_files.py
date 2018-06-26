@@ -56,4 +56,3 @@ def test_files_get(system, path, file, willpass):
         os.unlink(file)
     except Exception:
         pass
-
