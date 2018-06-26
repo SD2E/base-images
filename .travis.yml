@@ -41,8 +41,7 @@ deploy:
       - develop
 
 after_deploy:
-  provider: script
-  script: bash scripts/trigger-travis.sh sd2e base-images-custom ${TRAVIS_ACCESS_TOKEN}
+  - bash ./scripts/trigger-travis.sh sd2e base-images-custom ${TRAVIS_ACCESS_TOKEN}
   on:
     branch:
       - master
