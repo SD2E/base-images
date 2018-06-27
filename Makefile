@@ -7,6 +7,9 @@ LANGUAGE := ""
 TENANT_NAME := $(TENANT_NAME)
 TENANT_ID := $(TENANT_KEY)
 TENANT_DOCKER_ORG := $(TENANT_DOCKER_ORG)
+TENANT_GITHUB_ORG := $(TENANT_GITHUB_ORG)
+TENANT_TRAVIS_ORG := $(TENANT_TRAVIS_ORG)
+
 PREFIX := $(HOME)
 
 BUILDS = base-build languages-build apps-build jupyter-build reactors-build
@@ -72,3 +75,6 @@ reactors-clean:
 	make clean
 	cd reactors/python3-miniconda ; \
 	make clean
+
+downstream:
+	scripts/trigger-travis.sh $(TENANT_GITHUB_ORG) base-images-custom $(TRAVIS_ACCESS_TOKEN)
