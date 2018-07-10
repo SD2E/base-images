@@ -124,8 +124,9 @@ def process_agave_httperror(http_error_object):
     except Exception:
         err_msg = h.response.text
 
-    httperror = 'HTTPError - {}: {}; message: {}; status: {}; version: {}'
-    return httperror.format(code, reason, err_msg, status_msg, version_msg)
+    httperror = 'HTTPError - {} {}; message: {}; status: {}; version: {}; response.content: {}'
+    return httperror.format(code, reason, err_msg, status_msg, version_msg,
+                            h.response.content)
 
 
 def agave_mkdir(agaveClient, dirName, systemId, basePath='/',
