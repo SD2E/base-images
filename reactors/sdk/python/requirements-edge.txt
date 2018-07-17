@@ -3,6 +3,7 @@
 #####################
 AttrDict>=2.0.0
 PyYAML>=3.12
+arrow>=0.12.1
 hashids>=1.2.0
 jmespath>=0.9.3
 jsonschema==2.6.0
