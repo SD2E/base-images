@@ -1,3 +1,4 @@
+from . import entity
 from . import recursive
 from .utils import get_api_server, get_api_token, get_api_username
 from .reactors import message_reactor
