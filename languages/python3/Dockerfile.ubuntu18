@@ -32,3 +32,22 @@ RUN pip3 install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${
 ADD requirements-${CHANNEL}.txt /requirements.txt
 RUN pip3 install --upgrade -r /requirements.txt
 
+# Synbiohub Adapater
+
+RUN apt-get update && \
+    apt-get -y install libxslt1-dev && \
+    apt-get clean
+
+ARG SBHADAPTER_BRANCH=master
+ARG SBOL_BRANCH=master
+ARG XPLAN_TO_SBOL_BRANCH=master
+ARG PYSBOL_BRANCH=master
+
+RUN pip3 install --process-dependency-link git+https://github.com/SD2E/synbiohub_adapter.git
+# 08-31-2018 Downgrade pysbol to deal with a linker problem
+RUN pip uninstall -y pysbol
+RUN pip install pysbol==2.3.0.post14
+
+# Set XDG_CACHE_HOME, used by SBHADAPTER for cacheing, to point at /tmp which
+# is writeable when a container is running under the Reactors framework
+ENV XDG_CACHE_HOME=/tmp
