@@ -12,7 +12,7 @@ import re
 import sys
 import validators
 
-from time import sleep
+from time import sleep, time
 from random import random
 
 from attrdict import AttrDict
@@ -168,6 +168,8 @@ def read_config(namespace=NAMESPACE, places_list=CONFIG_LOCS,
         master_config = master_config + new_config
     return master_config
 
+def microseconds():
+    return int(round(time() * 1000 * 1000))
 
 class Reactor(object):
     """
@@ -181,6 +183,7 @@ class Reactor(object):
         self.uid = self.context.get('actor_id')
         self.execid = self.context.get('execution_id')
         self.state = self.context.get('state')
+        self.created = microseconds()
         self.aliases = aliases.store.AliasStore(self.client,
                                                 aliasPrefix='v1-alias-')
 #        self.aliascache = {}
@@ -698,6 +701,10 @@ class Reactor(object):
         except Exception:
             pass
         return nonce_vals
+
+    def elapsed(self):
+        """Returns elapsed time in microseconds since Reactor was initialized"""
+        return microseconds() - self.created
 
 
 def utcnow():
