@@ -37,12 +37,12 @@ deploy:
   script: bash scripts/push_containers_from_ci.sh ${REGISTRY_ORG} ${CHANNEL}
   on:
     branch:
-      - master
-      - develop
+      master
+      develop
 
-after_deploy:
-  - bash ./scripts/trigger-travis.sh sd2e base-images-custom ${TRAVIS_ACCESS_TOKEN}
-  on:
-    branch:
-      - master
-      - develop
+# after_deploy:
+#   - bash ./scripts/trigger-travis.sh sd2e base-images-custom ${TRAVIS_ACCESS_TOKEN}
+#   on:
+#     branch:
+#       - master
+#       - develop
