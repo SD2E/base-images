@@ -35,9 +35,9 @@ TTL = 86400
 VALID_PEMS = ['read', 'write', 'execute']
 VALID_ROLE_USERNAMES = ['world', 'public']
 
-_MAX_VAL_BYTES = 4096
+_MAX_VAL_BYTES = 32768
 _MIN_KEY_BYTES = 4
-_MAX_KEY_BYTES = 512
+_MAX_KEY_BYTES = 2048
 _RE_KEY_NAMES = re.compile('^[\S]+$', re.UNICODE)
 
 

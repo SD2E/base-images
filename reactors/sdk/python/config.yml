@@ -15,3 +15,7 @@ slack:
   webhook: ~
 logger:
   path: /logger/reactors
+linked_reactors:
+  taconator:
+    id: wZbBo78V1JPZQ
+    options: ~

@@ -374,6 +374,25 @@ class Reactor(object):
         if agaveutils.entity.is_appid(text):
             return text
 
+        try:
+            # current best form for config.yml#linked_reactors
+            # linked_reactors:
+            #   <aliasName:str>:
+            #       id: <actorId:str>
+            #       options: <dict>
+            identifier =  self.settings.get('linked_reactors', {}).get(text, {}).get('id', None)
+            if identifier is not None and isinstance(identifier, str):
+                return identifier
+
+            # older form for config.yml#linked_reactors
+            # linked_reactors:
+            #   <aliasName:str>: <actorId:str>
+            identifier = self.settings.get('linked_reactors', {}).get(text, None)
+            if identifier is not None and isinstance(identifier, str):
+                return identifier
+        except Exception:
+            pass
+
         # TODO - Implement a cache of looked-up values, assuming they are
         # very unlikely to change during the course of a single execution
         try:
@@ -387,7 +406,7 @@ class Reactor(object):
                      senderTags=True, retryMaxAttempts=MAX_RETRIES,
                      retryDelay=1, sync=False):
         """
-        Send a message to an Abaco actor by ID
+        Send a message to an Abaco actor by ID (or defined alias)
 
         Positional parameters:
         actorId: str - Valid actorId or alias
