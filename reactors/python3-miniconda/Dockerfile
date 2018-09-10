@@ -47,11 +47,11 @@ ADD sdk/message.json* /message.jsonschema
 
 # Install additional requirements from SDK
 ADD sdk/requirements-${CHANNEL}.txt /tmp/requirements.txt
-RUN pip3 install --upgrade -r /tmp/requirements.txt && \
+RUN pip3 install -r /tmp/requirements.txt && \
     rm -rf /tmp/requirements.txt
 
 # Track to latest AgavePy
-RUN pip3 install --upgrade git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
+RUN pip3 install git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 CMD ["python3", "/reactor.py"]
 

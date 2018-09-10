@@ -11,4 +11,5 @@ clean:
 
 tests: clean sdk
 	cd sdk ; \
-	PYTESTDIR=$(PYTESTDIR) PYTESTOPTS=$(PYTESTOPTS) make tests
+	PYTESTDIR=$(PYTESTDIR) PYTESTOPTS="$(PYTESTOPTS)" make tests
+

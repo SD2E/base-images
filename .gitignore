@@ -1,3 +1,7 @@
 */.pytest_cache
 *.pyc
 env.rc
+reactors/python2/sdk
+reactors/python3/sdk
+reactors/python2-miniconda/sdk
+reactors/python3-miniconda/sdk

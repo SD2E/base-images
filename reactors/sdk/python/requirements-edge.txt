@@ -17,3 +17,4 @@ cloudpickle
 ####################
 agavepy>=0.7.0
 tacconfig>=0.5.2
+requests_futures>=0.9.7
