@@ -51,7 +51,7 @@ RUN pip3 install --upgrade -r /tmp/requirements.txt && \
     rm -rf /tmp/requirements.txt
 
 # Track to latest AgavePy
-RUN pip3 install --upgrade git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
+# RUN pip3 install --upgrade git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 CMD ["python3", "/reactor.py"]
 

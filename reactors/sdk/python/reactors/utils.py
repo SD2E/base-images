@@ -506,7 +506,7 @@ class Reactor(object):
         permissive - bool - swallow validation errors [True]
         """
         return jsonmessages.validate_message(messagedict,
-                                             messageschema=MESSAGE_SCHEMA,
+                                             messageschema=messageschema,
                                              permissive=permissive)
 
     def create_webhook(self, permission='EXECUTE', maxuses=-1, actorId=None):

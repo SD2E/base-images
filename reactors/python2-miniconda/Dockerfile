@@ -48,7 +48,7 @@ RUN pip install -r /tmp/requirements.txt && \
     rm -rf /tmp/requirements.txt
 
 # Track to latest AgavePy
-RUN pip install git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
+# RUN pip install git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 CMD ["python", "/reactor.py"]
 
