@@ -2,9 +2,10 @@ FROM sd2e/python3:miniconda
 
 ARG CHANNEL=edge
 ARG LANGUAGE=python3-miniconda
-ARG VERSION=0.7.5
-ARG AGAVEPY_BRANCH=develop
+ARG VERSION=0.7.6
 ARG SCRATCH=/mnt/ephemeral-01
+ARG AGAVEPY_BRANCH=master
+ARG DATACATALOG_BRANCH=master
 
 # Discoverable version inside the container
 RUN echo "TACC.cloud Reactors\nLanguage: ${LANGUAGE}\nVersion: ${VERSION}" > /etc/reactors-VERSION
@@ -52,6 +53,9 @@ RUN pip3 install -r /tmp/requirements.txt && \
 
 # Track to latest AgavePy
 # RUN pip3 install git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
+
+# Track to latest SD2 datacatalog
+RUN pip3 install --upgrade git+https://github.com/SD2E/python-datacatalog.git@${DATACATALOG_BRANCH}
 
 CMD ["python3", "/reactor.py"]
 
