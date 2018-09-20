@@ -1,11 +1,11 @@
 FROM sd2e/python2:ubuntu16
 
-ARG CHANNEL=stable
+ARG CHANNEL=edge
 ARG LANGUAGE=python2
-ARG VERSION=0.7.5
-ARG AGAVEPY_BRANCH=develop
-ARG AGAVEDB_BRANCH=develop
+ARG VERSION=0.7.6
 ARG SCRATCH=/mnt/ephemeral-01
+ARG AGAVEPY_BRANCH=master
+ARG DATACATALOG_BRANCH=master
 
 # Discoverable version inside the container
 RUN echo "TACC.cloud Reactors\nLanguage: ${LANGUAGE}\nVersion: ${VERSION}" > /etc/reactors-VERSION
@@ -37,6 +37,7 @@ ADD sdk/reactors /reactors
 ADD reactor.py /
 ADD sdk/config.yml /
 ADD sdk/abacoschemas /abacoschemas
+
 # Older builds used message.json as an example message,
 # for the purpose of instruction. Later (post 2/2018) use message.jsonschema
 # to provide the default schema for JSON messages to the Reactor.
@@ -44,11 +45,14 @@ ADD sdk/message.json* /message.jsonschema
 
 # Install additional requirements from SDK
 ADD sdk/requirements-${CHANNEL}.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt && \
+RUN pip install --upgrade -r /tmp/requirements.txt && \
     rm -rf /tmp/requirements.txt
 
 # Track to latest AgavePy
 # RUN pip install git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
+
+# Track to latest SD2 datacatalog
+RUN pip install --upgrade git+https://github.com/SD2E/python-datacatalog.git@${DATACATALOG_BRANCH}
 
 CMD ["python", "/reactor.py"]
 
