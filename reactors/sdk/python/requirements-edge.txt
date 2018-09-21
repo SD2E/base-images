@@ -6,6 +6,7 @@ hashids>=1.2.0
 jmespath>=0.9.3
 petname>=2.2
 python-jsonschema-objects==0.3.1
+tenacity>=5.0.2
 ####################
 # TACC-maintained  #
 ####################
