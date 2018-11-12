@@ -26,9 +26,7 @@ RUN apt-get -y update && \
     apt-get clean
 
 RUN pip3 install jq
-
 RUN pip3 install --upgrade pip==${PYTHON_PIP_VERSION}
-RUN pip3 install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 ADD requirements-${CHANNEL}.txt /requirements.txt
 RUN pip3 install --upgrade -r /requirements.txt

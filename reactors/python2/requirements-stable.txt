@@ -14,3 +14,4 @@ agavepy>=0.7.0
 tacconfig>=0.5.2
 validators>=0.12.2
 requests_futures>=0.9.7
+tenacity>=5.0.2

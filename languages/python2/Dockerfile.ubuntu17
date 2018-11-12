@@ -5,7 +5,7 @@ ARG CHANNEL=stable
 ARG LANGUAGE=python2
 ARG BASE=ubuntu17
 
-ARG AGAVEPY_BRANCH=develop
+ARG AGAVEPY_BRANCH=master
 ARG PYTHON_PIP_VERSION=9.0.3
 ADD files/pip.conf /etc/pip.conf
 
@@ -19,7 +19,8 @@ RUN apt-get -y update && \
     apt-get clean
 
 RUN pip install --upgrade pip==${PYTHON_PIP_VERSION}
-RUN pip install --upgrade virtualenv git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
+RUN pip install --upgrade virtualenv
+# RUN pip install git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
 ADD requirements-${CHANNEL}.txt /requirements.txt
 RUN pip install --upgrade -r /requirements.txt

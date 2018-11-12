@@ -15,6 +15,8 @@ PASS_RETRIES = 5
 FAIL_RETRIES = 2
 
 
+@pytest.mark.skipif(sys.version_info.major >= 3,
+                    reason="Too time intensive")
 @pytest.mark.parametrize("system,basepath,willpass", [
     ('data-sd2e-community', '/sample/taco-cloud', False),
     ('data-sd2e-community', '/sample/tacc-cloud', True)
@@ -38,6 +40,8 @@ def test_files_mkdir(system, basepath, willpass):
                                               retries=FAIL_RETRIES)
 
 
+@pytest.mark.skipif(sys.version_info.major >= 3,
+                    reason="Too time intensive")
 @pytest.mark.parametrize("system,path,file,willpass", [
     ('data-sd2e-community', '/sample/tacc-cloud/ZZZ.png', 'ZZZ.png', False),
     ('data-sd2e-community', '/sample/tacc-cloud/672.png', '672.png', True)
