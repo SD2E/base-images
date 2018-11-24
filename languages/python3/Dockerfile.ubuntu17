@@ -52,3 +52,6 @@ RUN pip install pysbol==2.3.0.post14
 # Set XDG_CACHE_HOME, used by SBHADAPTER for cacheing, to point at /tmp which
 # is writeable when a container is running under the Reactors framework
 ENV XDG_CACHE_HOME=/tmp
+
+# JSONschema 3.x RC
+RUN pip3 install git+git://github.com/Julian/jsonschema@v3.0.0a3#egg=jsonschema

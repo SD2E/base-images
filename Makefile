@@ -80,5 +80,5 @@ downstream:
 	scripts/trigger-travis.sh $(TENANT_GITHUB_ORG) base-images-custom $(TRAVIS_ACCESS_TOKEN)
 
 reactors-and-langs-edge:
-	make languages-build LANGUAGE=python BASE=ubuntu17
+	make languages-build LANGUAGE=python BASE=ubuntu17 ; \
 	make reactors LANGUAGE=python CHANNEL=edge

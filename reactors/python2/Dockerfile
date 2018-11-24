@@ -54,6 +54,9 @@ RUN pip install --upgrade -r /tmp/requirements.txt && \
 # Track to latest SD2 datacatalog
 RUN pip install --upgrade git+https://github.com/SD2E/python-datacatalog.git@${DATACATALOG_BRANCH}
 
+# JSONschema 3.x RC
+RUN pip install --upgrade git+git://github.com/Julian/jsonschema@v3.0.0a3#egg=jsonschema
+
 CMD ["python", "/reactor.py"]
 
 # Onbuild support
