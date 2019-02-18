@@ -1,7 +1,10 @@
+from __future__ import absolute_import
+
+from . import agaveutils, aliases, logtypes,\
+    jsonmessages, process, storage, uniqueid
 """
 Utility library for building TACC Reactors
 """
-from __future__ import absolute_import
 
 import datetime
 import json
@@ -11,6 +14,7 @@ import pytz
 import re
 import sys
 import validators
+import requests
 
 from time import sleep, time
 from random import random
@@ -31,8 +35,6 @@ sys.path.append(os.path.split(os.getcwd())[0])
 # sys.path.append('/reactors')
 # from . import agaveutils, alias, logs,\
 #     loggers, jsonmessages, process, storage, uniqueid
-from . import agaveutils, aliases, logtypes,\
-    jsonmessages, process, storage, uniqueid
 
 VERSION = '0.6.2'
 LOG_LEVEL = 'DEBUG'
@@ -168,13 +170,16 @@ def read_config(namespace=NAMESPACE, places_list=CONFIG_LOCS,
         master_config = master_config + new_config
     return master_config
 
+
 def microseconds():
     return int(round(time() * 1000 * 1000))
+
 
 class Reactor(object):
     """
     Helper class providing a client-side API for the Actors service
     """
+
     def __init__(self, redactions=[]):
         self.nickname = petname.Generate(2, '-')
         self.client = get_client_with_mock_support()
@@ -183,6 +188,9 @@ class Reactor(object):
         self.uid = self.context.get('actor_id')
         self.execid = self.context.get('execution_id')
         self.state = self.context.get('state')
+        self.worker_id = os.environ.get('_abaco_worker_id', None)
+        self.container_repo = os.environ.get('_abaco_container_repo', None)
+        self.actor_name = os.environ.get('_abaco_actor_name', None)
         self.created = microseconds()
         self.aliases = aliases.store.AliasStore(self.client,
                                                 aliasPrefix='v1-alias-')
@@ -258,9 +266,13 @@ class Reactor(object):
         # structured log response
         extras = {'agent': self.uid,
                   'task': self.execid,
-                  'name': self.get_attr('name'),
+                  'name': self.actor_name,
                   'username': self.username,
-                  'session': self.session}
+                  'session': self.session,
+                  'resource': self.container_repo,
+                  'subtask': self.worker_id,
+                  'host_ip': requests.request('GET', 'http://myip.dnsomatic.com').text
+                  }
 
         # Screen logger prints to the following, depending on configuration
         # STDERR - Always
@@ -292,6 +304,17 @@ class Reactor(object):
         """
         default_attr = None
         default_dict = {}
+
+        # Temporary hack
+        #
+        # Avoid the call to /actors/:actorId if
+        # possible, since it DDOSes the service under load. Also
+        # the name will soon be avaiable in reactor context as per
+        # https://github.com/TACC/abaco/issues/53
+        if attribute == 'name':
+            if os.environ.get('_abaco_actor_name', None) is not None:
+                return os.environ.get('_abaco_actor_name')
+
         if self.local is True:
             default_attr = 'mockup'
             default_dict = {}
@@ -380,7 +403,7 @@ class Reactor(object):
             #   <aliasName:str>:
             #       id: <actorId:str>
             #       options: <dict>
-            identifier =  self.settings.get('linked_reactors', {}).get(text, {}).get('id', None)
+            identifier = self.settings.get('linked_reactors', {}).get(text, {}).get('id', None)
             if identifier is not None and isinstance(identifier, str):
                 return identifier
 
