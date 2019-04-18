@@ -8,7 +8,7 @@ RUN apt-get -y update && \
     apt-get clean
 
 # jq for parsing JSON
-RUN curl -L -sk -o /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" \
+RUN curl -L -sk -o /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64" \
     && chmod a+x /usr/local/bin/jq
 
 #### This is a temporary fix for an issue with OverlayFS on TACC systems ###
@@ -31,3 +31,13 @@ ARG CHANNEL=stable
 ENV _PROJ_CORRAL=${CORRAL}
 ENV _PROJ_STOCKYARD=${STOCKYARD}/${PROJECT}
 ENV _USER_WORK=
+
+ENV ABACO_HASHIDS_SALT=eJa5wZlEX4eWU
+ENV TACC_PROJECT_NAME=SD2E-Community
+ENV TACC_PROJECT_ID=37391
+ENV TACC_PROJECT_GROUP=819382
+ENV TACC_TENANT=sd2e
+ENV TACC_API_SERVER=https://api.sd2e.org/
+ENV TACC_JUPYTER_SERVER=https://jupyter.sd2e.org/
+ENV TACC_MANAGER_ACCOUNT=sd2eadm
+ENV TACC_PRIMARY_STORAGE_SYSTEM=data-sd2e-community
