@@ -13,20 +13,17 @@ tox==3.0.0
 sphinx==1.7.5
 recommonmark==0.4.0
 # automation
-python-jenkins==1.0.2
+python-jenkins>=1.0.2
 # schemas and validation
-jsonschema==2.6.0
-lollipop==1.1.7
-validators==0.12.2
-semver==2.8.0
+jsonschema>=3.0.1
+lollipop>=1.1.7
+validators>=0.12.2
+semver>=2.8.0
 # git+git://github.com/Julian/jsonschema@v3.0.0a3#egg=jsonschema
 
 # other
 urllib3>=1.22
-pytz>=2018.5
-# other
-urllib3>=1.22
-pytz>=2018.5
+pytz>=2018.9
 # TACC
 agavepy>=0.7.3
 tacconfig>=0.5.2

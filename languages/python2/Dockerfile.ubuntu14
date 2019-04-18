@@ -11,11 +11,11 @@ ADD files/pip.conf /etc/pip.conf
 
 RUN apt-get -y update && \
     apt-get -y install build-essential \
-               python python-dev \
-               python-pip \
-               python-setuptools \
-               libssl-dev \
-               libffi-dev  && \
+    python python-dev \
+    python-pip \
+    python-setuptools \
+    libssl-dev \
+    libffi-dev  && \
     apt-get clean
 
 # setuptools is key - otherwise cryptography>=1.9 has abandoned Py < 3!
@@ -29,3 +29,5 @@ RUN pip install --upgrade pyOpenSSL
 
 ADD requirements-${CHANNEL}.txt /requirements.txt
 RUN pip install --upgrade -r /requirements.txt
+
+ENV PYTHONNOUSERSITE=1
