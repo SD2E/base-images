@@ -20,6 +20,7 @@ from time import sleep, time
 from random import random
 
 from attrdict import AttrDict
+from agavepy.agave import Agave, AgaveError
 from agavepy.actors import get_context
 from agavepy.actors import get_client
 from requests.exceptions import HTTPError
@@ -36,7 +37,7 @@ sys.path.append(os.path.split(os.getcwd())[0])
 # from . import agaveutils, alias, logs,\
 #     loggers, jsonmessages, process, storage, uniqueid
 
-VERSION = '0.6.2'
+VERSION = '0.6.5'
 LOG_LEVEL = 'DEBUG'
 LOG_FILE = None
 NAMESPACE = '_REACTOR'
@@ -69,17 +70,19 @@ def get_client_with_mock_support():
     bootstrap a client from supplied credentials if running in local or
     debug mode.
     '''
-    _client = None
-    if os.environ.get('_abaco_access_token') is None:
-        from agavepy.agave import Agave
+    client = None
+    if '_abaco_access_token' not in os.environ:
         try:
-            _client = Agave.restore()
-        except TypeError:
-            _client = None
+            client = Agave.restore()
+        except TypeError as err:
+            raise AgaveError('Unable to restore Agave client: {}'.format(err))
     else:
-        _client = get_client()
+        try:
+            client = get_client()
+        except Exception as err:
+            raise AgaveError('Unable to get Agave client from context: {}'.format(err))
 
-    return _client
+    return client
 
 
 def get_context_with_mock_support(agave_client):
@@ -374,86 +377,82 @@ class Reactor(object):
         env_vars.update(sender_envs)
         return env_vars
 
-    def resolve_identifier(self, text):
+    def resolve_actor_alias(self, alias):
         """
-        Efficiently look up the identifier for a alias string
+        Look up the identifier for a alias string
 
-        Positional parameters:
-        text: str - An alias, actorId, appId, or the me/self shortcut
+        Arguments
+            alias (str): An alias, actorId, appId, or the me/self shortcut
 
         Returns:
-        identifier: str - The resolved value for text
+            str: The resolved identifier
 
         On error:
         Returns value of text
 
-        Notes: Does basic optimization of returning an app ID or abaco actorId
-        if they are passed, as we can safely assume those are not aliases.
+        Note:
+            Does basic optimization of returning an app ID or abaco actorId
+            if they are passed, as we can safely assume those are not aliases.
         """
 
-        if uniqueid.is_hashid(text):
-            return text
+        # Optimizations
+        if alias.lower() in ['me', 'self']:
+            return self.uid
+        if uniqueid.is_hashid(alias):
+            return alias
+        # No longer supported!
+        # if agaveutils.entity.is_appid(alias):
+        #     return alias
 
-        if agaveutils.entity.is_appid(text):
-            return text
-
+        # Consult linked_reactors stanza in config.yml. This allows Reactor-
+        # scoped override of aliases defined by the Abaco service
         try:
-            # current best form for config.yml#linked_reactors
+            # file:config.yml
+            # ---
             # linked_reactors:
             #   <aliasName:str>:
             #       id: <actorId:str>
             #       options: <dict>
-            identifier = self.settings.get('linked_reactors', {}).get(text, {}).get('id', None)
+            identifier = self.settings.get('linked_reactors', {}).get(alias, {}).get('id', None)
             if identifier is not None and isinstance(identifier, str):
                 return identifier
-
-            # older form for config.yml#linked_reactors
-            # linked_reactors:
-            #   <aliasName:str>: <actorId:str>
-            identifier = self.settings.get('linked_reactors', {}).get(text, None)
-            if identifier is not None and isinstance(identifier, str):
-                return identifier
-        except Exception:
+        except KeyError:
             pass
 
-        # TODO - Implement a cache of looked-up values, assuming they are
-        # very unlikely to change during the course of a single execution
-        try:
-            result = self.aliases.get_name(text)
-            return result
-        except Exception:
-            return text
+        # Resolution has not failed but rather has identified a value that is
+        # likely to be an Abaco platform alias
+        return alias
 
     def send_message(self, actorId, message,
                      environment={}, ignoreErrors=True,
                      senderTags=True, retryMaxAttempts=MAX_RETRIES,
                      retryDelay=1, sync=False):
         """
-        Send a message to an Abaco actor by ID (or defined alias)
+        Send a message to an Abaco actor by ID, platform alias, or defined alias
 
-        Positional parameters:
-        actorId: str - Valid actorId or alias
-        message: str/dict - Message to send
+        Arguments:
+            actorId (str): An actorId or alias
+            message (str/dict) : Message to send
 
-        Keyword arguments:
-        ignoreErrors: bool -  only mark failures by logging not exception
-        environment: dict - environment variables to pass as url params
-        senderTags: bool - send provenance and session vars along
-        retryDelay: int - seconds between retries on send failure
-        retryMax: int - number of times (up to global MAX_RETRIES) to retry
-        sync: bool - not implemented - wait for message to execute
+        Keyword Arguments:
+            ignoreErrors: bool -  only mark failures by logging not exception
+            environment: dict - environment variables to pass as url params
+            senderTags: bool - send provenance and session vars along
+            retryDelay: int - seconds between retries on send failure
+            retryMax: int - number of times (up to global MAX_RETRIES) to retry
+            sync: bool - not implemented - wait for message to execute
 
         Returns:
-        execution_id: str
+            str: The excecutionId of the resulting execution
 
-        If ignoreErrors is True, this is a fire-and-forget operation. Else,
-        failures raise an Exception to handled by the caller.
+        Raises:
+            AgaveError: Raised if ignoreErrors is True
         """
 
-        resolved_actor_id = self.resolve_identifier(actorId)
         # Build dynamic list of variables. This is how attributes like
         # session and sender-id are propagated
         environment_vars = self._get_environment(environment, senderTags)
+        resolved_actor_id = self.resolve_actor_alias(actorId)
 
         retry = retryDelay
         attempts = 0
@@ -463,8 +462,8 @@ class Reactor(object):
         exception_err = 'Exception encountered messaging {}'
         terminal_err = 'Message to {} failed after {} tries with errors: {}'
 
-        self.logger.info("message.to: {}".format(actorId))
-        self.logger.debug("message.body: {}".format(message))
+        self.logger.info("Message.to: {}".format(actorId))
+        self.logger.debug("Message.body: {}".format(message))
 
         while attempts <= retryMaxAttempts:
             try:
@@ -484,9 +483,14 @@ class Reactor(object):
                     self.logger.error(
                         noexecid_err.format(resolved_actor_id))
 
-            except HTTPError as h:
-                http_err_resp = agaveutils.process_agave_httperror(h)
-                self.logger.error(http_err_resp)
+            except HTTPError as herr:
+                if herr.response.status_code == 404:
+                    # Agave never returns 404 unless the thing isn't there
+                    # so might as well bail out early if we see one
+                    attempts = retryMaxAttempts + 1
+                else:
+                    http_err_resp = agaveutils.process_agave_httperror(herr)
+                    self.logger.error(http_err_resp)
 
             # This should only happen in egregious circumstances
             # since the vast majority of AgavePy error manifest as
@@ -510,9 +514,9 @@ class Reactor(object):
                                                   retryMaxAttempts,
                                                   exceptions))
         else:
-            raise Exception(terminal_err.format(resolved_actor_id,
-                                                retryMaxAttempts,
-                                                exceptions))
+            raise AgaveError(terminal_err.format(resolved_actor_id,
+                                                 retryMaxAttempts,
+                                                 exceptions))
 
     def validate_message(self,
                          messagedict,
@@ -556,9 +560,9 @@ class Reactor(object):
                 raise ValueError("Webhook URI {} is not valid".format(uri))
         except HTTPError as h:
             http_err_resp = agaveutils.process_agave_httperror(h)
-            raise Exception(http_err_resp)
+            raise AgaveError(http_err_resp)
         except Exception as e:
-            raise Exception(
+            raise AgaveError(
                 "Unknown error: {}".format(e))
 
     def delete_webhook(self, webhook, actorId=None):
@@ -583,9 +587,9 @@ class Reactor(object):
             self.delete_nonce(nonceId=nonce_id, actorId=_actorId)
         except HTTPError as h:
             http_err_resp = agaveutils.process_agave_httperror(h)
-            raise Exception(http_err_resp)
+            raise AgaveError(http_err_resp)
         except Exception as e:
-            raise Exception(
+            raise AgaveError(
                 "Unknown error: {}".format(e))
 
     def add_nonce(self, permission='READ', maxuses=1, actorId=None):
@@ -618,9 +622,9 @@ class Reactor(object):
             return resp
         except HTTPError as h:
             http_err_resp = agaveutils.process_agave_httperror(h)
-            raise Exception(http_err_resp)
+            raise AgaveError(http_err_resp)
         except Exception as e:
-            raise Exception(
+            raise AgaveError(
                 "Unknown error: {}".format(e))
 
     def get_nonce(self, nonceId, actorId=None):
@@ -644,9 +648,9 @@ class Reactor(object):
             return resp
         except HTTPError as h:
             http_err_resp = agaveutils.process_agave_httperror(h)
-            raise Exception(http_err_resp)
+            raise AgaveError(http_err_resp)
         except Exception as e:
-            raise Exception(
+            raise AgaveError(
                 "Unknown error: {}".format(e))
 
     def delete_nonce(self, nonceId, actorId=None):
@@ -670,9 +674,9 @@ class Reactor(object):
             return resp
         except HTTPError as h:
             http_err_resp = agaveutils.process_agave_httperror(h)
-            raise Exception(http_err_resp)
+            raise AgaveError(http_err_resp)
         except Exception as e:
-            raise Exception(
+            raise AgaveError(
                 "Unknown error: {}".format(e))
 
     def list_nonces(self, actorId=None):
@@ -696,9 +700,9 @@ class Reactor(object):
             return resp
         except HTTPError as h:
             http_err_resp = agaveutils.process_agave_httperror(h)
-            raise Exception(http_err_resp)
+            raise AgaveError(http_err_resp)
         except Exception as e:
-            raise Exception(
+            raise AgaveError(
                 "Unknown error: {}".format(e))
 
     def delete_all_nonces(self, actorId=None):
@@ -720,9 +724,9 @@ class Reactor(object):
                 self.delete_nonce(nonce.get('id'), actorId=_actorId)
         except HTTPError as h:
             http_err_resp = agaveutils.process_agave_httperror(h)
-            raise Exception(http_err_resp)
+            raise AgaveError(http_err_resp)
         except Exception as e:
-            raise Exception(
+            raise AgaveError(
                 "Unknown error: {}".format(e))
 
     def _get_nonce_vals(self):

@@ -1,11 +1,11 @@
+from reactors.utils import Reactor
+import pytest
 import os
 import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 PARENT = os.path.dirname(HERE)
 sys.path.insert(0, PARENT)
 sys.path.append('/reactors')
-import pytest
-from reactors.utils import Reactor
 
 
 def test_read_logtoken_config():
@@ -21,7 +21,8 @@ def test_read_logtoken_env(monkeypatch):
     r = Reactor()
     assert r.settings.logs.token == 'VewyVewySekwit'
 
-
+@pytest.mark.skipif(sys.version_info.major >= 3,
+                    reason="Test itself is not yet Py3 compatible")
 def test_log_stderr(caplog, capsys):
     '''Verify logging to stderr works'''
     message = 'Hello'

@@ -13,3 +13,4 @@ tenacity>=5.0.2
 agavepy>=0.7.3
 tacconfig>=0.5.2
 requests_futures>=0.9.7
+pycodestyle==2.3.1
