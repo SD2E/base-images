@@ -5,7 +5,7 @@ ARG LANGUAGE=python3
 ARG BASE=alpine36
 
 ARG AGAVEPY_BRANCH=master
-ARG PYTHON_PIP_VERSION=9.0.3
+ARG PYTHON_PIP_VERSION=19.0.3
 ADD files/pip.conf /etc/pip.conf
 
 # https://github.com/frol/docker-alpine-python3/blob/master/Dockerfile

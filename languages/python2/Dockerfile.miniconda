@@ -6,7 +6,7 @@ ARG LANGUAGE=python2-miniconda
 ARG BASE=miniconda3
 
 ARG AGAVEPY_BRANCH=master
-ARG PYTHON_PIP_VERSION=9.0.3
+ARG PYTHON_PIP_VERSION=19.0.3
 ADD files/pip.conf /etc/pip.conf
 
 RUN apt-get -y update && \

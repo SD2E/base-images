@@ -63,8 +63,8 @@ reactors: reactors-build
 	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE)
 
 reactors-edge:
-	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) edge build python
-	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) edge release python
+	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) edge build python3
+	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) edge release python3
 
 reactors-clean:
 	cd reactors/python2 ; \
@@ -80,5 +80,5 @@ downstream:
 	scripts/trigger-travis.sh $(TENANT_GITHUB_ORG) base-images-custom $(TRAVIS_ACCESS_TOKEN)
 
 reactors-and-langs-edge:
-	make languages-build LANGUAGE=python BASE=ubuntu17 ; \
-	make reactors LANGUAGE=python CHANNEL=edge
+	make languages-build LANGUAGE=python3 BASE=ubuntu17 ; \
+	make reactors LANGUAGE=python3 CHANNEL=edge

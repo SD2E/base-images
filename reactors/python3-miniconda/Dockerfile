@@ -2,7 +2,7 @@ FROM sd2e/python3:miniconda
 
 ARG CHANNEL=edge
 ARG LANGUAGE=python3-miniconda
-ARG VERSION=0.7.6
+ARG VERSION=0.8.1
 ARG SCRATCH=/mnt/ephemeral-01
 ARG AGAVEPY_BRANCH=master
 ARG DATACATALOG_BRANCH=master

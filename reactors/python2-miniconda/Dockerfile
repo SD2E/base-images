@@ -2,7 +2,7 @@ FROM sd2e/python2:miniconda
 
 ARG CHANNEL=stable
 ARG LANGUAGE=python2-miniconda
-ARG VERSION=0.7.5
+ARG VERSION=0.8.1
 ARG AGAVEPY_BRANCH=master
 ARG AGAVEDB_BRANCH=master
 ARG SCRATCH=/mnt/ephemeral-01
