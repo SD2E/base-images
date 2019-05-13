@@ -4,8 +4,8 @@ ARG CHANNEL=edge
 ARG LANGUAGE=python3
 ARG VERSION=0.8.1
 ARG SCRATCH=/mnt/ephemeral-01
-ARG AGAVEPY_BRANCH=master
-ARG DATACATALOG_BRANCH=master
+ARG AGAVEPY_BRANCH=v0.7.3
+ARG DATACATALOG_BRANCH=v2.0.0
 
 # Discoverable version inside the container
 RUN echo "TACC.cloud Reactors\nLanguage: ${LANGUAGE}\nVersion: ${VERSION}" > /etc/reactors-VERSION
@@ -46,6 +46,9 @@ ADD sdk/abacoschemas /abacoschemas
 # to provide the default schema for JSON messages to the Reactor.
 ADD sdk/message.json* /message.jsonschema
 
+RUN rm -rf /usr/lib/python3/dist-packages/xdg && \
+    rm /usr/lib/python3/dist-packages/pyxdg-0.25.egg-info
+
 # Install additional requirements from SDK
 ADD sdk/requirements-${CHANNEL}.txt /tmp/requirements.txt
 RUN pip3 install --upgrade -r /tmp/requirements.txt && \
@@ -55,13 +58,13 @@ RUN pip3 install --upgrade -r /tmp/requirements.txt && \
 RUN pip3 install --upgrade git+https://github.com/SD2E/python-datacatalog.git@${DATACATALOG_BRANCH}
 
 # JSONschema 3.x RC
-RUN pip3 install --upgrade git+git://github.com/Julian/jsonschema@v3.0.0a3#egg=jsonschema
+# RUN pip3 install --upgrade git+git://github.com/Julian/jsonschema@v3.0.0a3#egg=jsonschema
 
 CMD ["python3", "/reactor.py"]
 
 # Onbuild support
 ONBUILD ADD requirements.txt /tmp/requirements.txt
-ONBUILD RUN pip3 install -r /tmp/requirements.txt
+ONBUILD RUN pip3 install --ignore-installed -r /tmp/requirements.txt
 ONBUILD ADD reactor.py /
 ONBUILD ADD config.yml /
 ONBUILD ADD message.json* /message.jsonschema

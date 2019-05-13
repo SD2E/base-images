@@ -9,6 +9,8 @@ ARG AGAVEPY_BRANCH=master
 ARG PYTHON_PIP_VERSION=19.0.3
 ADD files/pip.conf /etc/pip.conf
 
+RUN sed -i -re 's/([a-z]{2}\.)?archive.ubuntu.com|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+
 RUN apt-get -y update && \
     apt-get -y install build-essential \
     python3 \
