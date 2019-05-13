@@ -64,7 +64,7 @@ CMD ["python3", "/reactor.py"]
 
 # Onbuild support
 ONBUILD ADD requirements.txt /tmp/requirements.txt
-ONBUILD RUN pip3 install --ignore-installed -r /tmp/requirements.txt
+ONBUILD RUN pip3 install -r /tmp/requirements.txt
 ONBUILD ADD reactor.py /
 ONBUILD ADD config.yml /
 ONBUILD ADD message.json* /message.jsonschema
