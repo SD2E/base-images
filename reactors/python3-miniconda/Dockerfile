@@ -46,6 +46,14 @@ ADD sdk/abacoschemas /abacoschemas
 # to provide the default schema for JSON messages to the Reactor.
 ADD sdk/message.json* /message.jsonschema
 
+# Force locale to UTF-8
+RUN apt-get update && \
+    apt-get install -y locales locales-all && \
+    apt-get clean
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+
 # Install additional requirements from SDK
 ADD sdk/requirements-${CHANNEL}.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt && \

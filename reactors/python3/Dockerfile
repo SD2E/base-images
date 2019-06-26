@@ -49,6 +49,14 @@ ADD sdk/message.json* /message.jsonschema
 RUN rm -rf /usr/lib/python3/dist-packages/xdg && \
     rm /usr/lib/python3/dist-packages/pyxdg-0.25.egg-info
 
+# Force locale to UTF-8
+RUN apt-get update && \
+    apt-get install -y locales locales-all && \
+    apt-get clean
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+
 # Install additional requirements from SDK
 ADD sdk/requirements-${CHANNEL}.txt /tmp/requirements.txt
 RUN pip3 install --upgrade -r /tmp/requirements.txt && \
@@ -61,14 +69,6 @@ RUN pip3 install --upgrade -r /tmp/requirements.txt && \
 # RUN pip3 install --upgrade git+git://github.com/Julian/jsonschema@v3.0.0a3#egg=jsonschema
 
 CMD ["python3", "/reactor.py"]
-
-# Force locale to UTF-8
-RUN apt-get update && \
-    apt-get install -y locales locales-all && \
-    apt-get clean
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
 
 # Onbuild support
 ONBUILD ADD requirements.txt /tmp/requirements.txt
