@@ -4,7 +4,7 @@ ARG CHANNEL=edge
 ARG LANGUAGE=python3
 ARG VERSION=0.8.1
 ARG SCRATCH=/mnt/ephemeral-01
-ARG AGAVEPY_BRANCH=v0.7.3
+ARG AGAVEPY_BRANCH=master
 ARG DATACATALOG_BRANCH=v2.0.0
 
 # Discoverable version inside the container
@@ -55,12 +55,20 @@ RUN pip3 install --upgrade -r /tmp/requirements.txt && \
     rm -rf /tmp/requirements.txt
 
 # Track to latest SD2 datacatalog
-RUN pip3 install --upgrade git+https://github.com/SD2E/python-datacatalog.git@${DATACATALOG_BRANCH}
+# RUN pip3 install --upgrade git+https://github.com/SD2E/python-datacatalog.git@${DATACATALOG_BRANCH}
 
 # JSONschema 3.x RC
 # RUN pip3 install --upgrade git+git://github.com/Julian/jsonschema@v3.0.0a3#egg=jsonschema
 
 CMD ["python3", "/reactor.py"]
+
+# Force locale to UTF-8
+RUN apt-get update && \
+    apt-get install -y locales locales-all && \
+    apt-get clean
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
 
 # Onbuild support
 ONBUILD ADD requirements.txt /tmp/requirements.txt

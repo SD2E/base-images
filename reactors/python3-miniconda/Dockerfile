@@ -54,8 +54,8 @@ RUN pip3 install -r /tmp/requirements.txt && \
 # Track to latest AgavePy
 # RUN pip3 install git+https://github.com/TACC/agavepy.git@${AGAVEPY_BRANCH}
 
-# Track to latest SD2 datacatalog
-RUN pip3 install --upgrade git+https://github.com/SD2E/python-datacatalog.git@${DATACATALOG_BRANCH}
+# # Track to latest SD2 datacatalog
+# RUN pip3 install --upgrade git+https://github.com/SD2E/python-datacatalog.git@${DATACATALOG_BRANCH}
 
 CMD ["python3", "/reactor.py"]
 

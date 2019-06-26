@@ -44,9 +44,9 @@ ARG XPLAN_TO_SBOL_BRANCH=master
 ARG PYSBOL_BRANCH=master
 
 RUN pip3 install --process-dependency-link git+https://github.com/SD2E/synbiohub_adapter.git
-# 08-31-2018 Downgrade pysbol to deal with a linker problem
-RUN pip uninstall -y pysbol
-RUN pip install pysbol==2.3.0.post14
+# # 08-31-2018 Downgrade pysbol to deal with a linker problem
+# RUN pip uninstall -y pysbol
+# RUN pip install pysbol==2.3.0.post14
 
 # Set XDG_CACHE_HOME, used by SBHADAPTER for cacheing, to point at /tmp which
 # is writeable when a container is running under the Reactors framework
