@@ -24,8 +24,15 @@ RUN apt-get -y update && \
     python3-setuptools \
     build-essential \
     libssl-dev \
-    libffi-dev  && \
-    apt-get clean
+    libffi-dev  \
+    locales \
+    locales-all && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
 
 RUN pip3 install jq
 
@@ -57,3 +64,4 @@ ENV XDG_CACHE_HOME=/tmp
 # RUN pip3 install git+git://github.com/Julian/jsonschema@v3.0.0a3#egg=jsonschema
 
 ENV PYTHONNOUSERSITE=1
+

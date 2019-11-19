@@ -21,8 +21,11 @@ RUN apt-get -y update && \
     python3-setuptools \
     build-essential \
     libssl-dev \
+    locales \
+    locales-all \
     libffi-dev  && \
-    apt-get clean
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install jq
 
