@@ -13,6 +13,12 @@ def bg_cb(sess, resp):
     """Noop the response so logging is fire-and-forget"""
     pass
 
+# As per https://github.com/ross/requests-futures#working-in-the-background
+def response_hook_noop(resp, *args, **kwargs):
+    """Noop the response so logging is fire-and-forget
+    """
+    pass
+
 class LogstashPlaintextHandler(logging.Handler):
     """Py2-3.4 compatible method to send logs to LogStash HTTP handler"""
 
@@ -48,8 +54,10 @@ class LogstashPlaintextHandler(logging.Handler):
 
         if post_uri is not None and passwd is not None:
             try:
+                # As per https://github.com/ross/requests-futures#working-in-the-background
                 session.post(post_uri, auth=(uname, passwd), json=log_entry,
-                             headers=headers, background_callback=bg_cb)
+                             headers=headers,
+                             hooks={'response': response_hook_noop})
             except (KeyboardInterrupt, SystemExit):
                 raise
             except Exception:

@@ -37,7 +37,7 @@ sys.path.append(os.path.split(os.getcwd())[0])
 # from . import agaveutils, alias, logs,\
 #     loggers, jsonmessages, process, storage, uniqueid
 
-VERSION = '0.6.5'
+VERSION = '0.6.6'
 LOG_LEVEL = 'DEBUG'
 LOG_FILE = None
 NAMESPACE = '_REACTOR'
