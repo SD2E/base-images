@@ -9,21 +9,25 @@ from requests_futures.sessions import FuturesSession
 
 session = FuturesSession()
 
+
 def bg_cb(sess, resp):
     """Noop the response so logging is fire-and-forget"""
     pass
 
 # As per https://github.com/ross/requests-futures#working-in-the-background
+
+
 def response_hook_noop(resp, *args, **kwargs):
     """Noop the response so logging is fire-and-forget
     """
     pass
 
+
 class LogstashPlaintextHandler(logging.Handler):
     """Py2-3.4 compatible method to send logs to LogStash HTTP handler"""
 
     def __init__(self, config, client_secret):
-        print("LogstashPlaintextHandler.futures_session")
+        # print("LogstashPlaintextHandler.futures_session")
         if not isinstance(config, dict):
             config = {}
         self.uri = config.get('uri', 'http://127.0.0.1') +\

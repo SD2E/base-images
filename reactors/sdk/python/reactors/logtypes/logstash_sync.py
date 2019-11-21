@@ -4,10 +4,12 @@ import logging
 import logging.handlers
 import traceback
 
+
 class LogstashPlaintextHandler(logging.Handler):
     """Forwards logs on to LogStash HTTP handler"""
+
     def __init__(self, config, client_secret):
-        print("LogstashPlaintextHandler.sync")
+        # print("LogstashPlaintextHandler.sync")
 
         if not isinstance(config, dict):
             config = {}
