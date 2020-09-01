@@ -82,3 +82,7 @@ downstream:
 reactors-and-langs-edge:
 	make languages-build LANGUAGE=python3 BASE=ubuntu17 ; \
 	make reactors LANGUAGE=python3 CHANNEL=edge
+
+reactors-and-langs:
+	make languages-build LANGUAGE=python3 BASE=ubuntu17 ; \
+	make reactors LANGUAGE=python3 CHANNEL=stable

@@ -27,3 +27,6 @@ pytz>=2018.9
 # TACC
 agavepy>=0.9.0
 tacconfig>=0.5.2
+
+# pin setuptools to mast major release
+setuptools<50.0.0
