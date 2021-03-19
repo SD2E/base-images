@@ -43,7 +43,8 @@ default-actor-context: | git
 	# TODO: use cookiecutter template at
 	# https://github.com/shwetagopaul92/cc-tapis-v2-actors
 	mkdir -p $@
-	git clone https://github.com/TACC-Cloud/example-reactors example-reactors
+	git clone --single-branch --branch develop-eho \
+		https://github.com/TACC-Cloud/example-reactors.git example-reactors
 	cp -r example-reactors/hello_world/* $@
 	rm -rf ./example-reactors
 
