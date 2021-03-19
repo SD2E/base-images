@@ -1,8 +1,4 @@
-DOCKER_ORG ?= enho
-DOCKER_REPO ?= reactors
-DOCKER_TAG ?= python3
-DOCKER_IMAGE ?= $(DOCKER_ORG)/$(DOCKER_REPO):$(DOCKER_TAG)
-AGAVE_CRED_CACHE ?= ~/.agave
+include config.mk
 GITREF=$(shell git rev-parse --short HEAD)
 GITREF_FULL=$(shell git rev-parse HEAD)
 
