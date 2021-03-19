@@ -1,2 +1,0 @@
-AttrDict>=2.0.0
-PyYAML>=3.12
