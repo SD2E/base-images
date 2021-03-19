@@ -7,6 +7,7 @@ RUN apt-get update && \
 ARG SDK_BRANCH=main
 ARG TEMPLATE_DIR=cc-tapis-v2-actors
 ARG PYTHON=python3
+ENV AGAVE_CRED_CACHE=/root/.agave
 
 # install Reactors SDK
 RUN ${PYTHON} -m pip install git+https://github.com/TACC-Cloud/python-reactors.git@${SDK_BRANCH}
