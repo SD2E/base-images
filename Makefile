@@ -1,14 +1,10 @@
-ACTOR_ID ?= $(shell head -1 .actorid)
+DOCKER_ORG ?= enho
+DOCKER_NAME ?= reactors
+DOCKER_TAG ?= python3
+DOCKER_IMAGE ?= $(DOCKER_ORG)/$(DOCKER_NAME):$(DOCKER_TAG)
 AGAVE_CREDS ?= ~/.agave
 GITREF=$(shell git rev-parse --short HEAD)
 GITREF_FULL=$(shell git rev-parse HEAD)
-
-# lightweight JSON to env utility, as string
-define JSON_TO_ENV
-import json as j, pipes as p, sys as s;
-[print('{0}={1};'.format(p.quote(k), p.quote(v))) for k, v in j.load(s.stdin).items()]
-endef
-export JSON_TO_ENV
 
 # ------------------------------------------------------------------------------
 # Sanity checks
@@ -21,19 +17,13 @@ PROGRAMS := git docker python poetry singularity tox tapis
 docker:
 	docker info 1> /dev/null 2> /dev/null && \
 	if [ ! $$? -eq 0 ]; then \
-		echo "\n[ERROR] Could not communicate with docker daemon. You may need to run with sudo.\n"; \
+		echo "\n[ERROR] Could not communicate with docker daemon.\n"; \
 		exit 1; \
 	fi
-python poetry singularity tapis:
+python tapis:
 	$@ --help &> /dev/null; \
 	if [ ! $$? -eq 0 ]; then \
 		echo "[ERROR] $@ does not seem to be on your path. Please install $@"; \
-		exit 1; \
-	fi
-tox:
-	$@ -h &> /dev/null; \
-	if [ ! $$? -eq 0 ]; then \
-		echo "[ERROR] $@ does not seem to be on your path. Please pip install $@"; \
 		exit 1; \
 	fi
 git:
@@ -44,24 +34,22 @@ git:
 	fi
 
 # ------------------------------------------------------------------------------
+# Docker build
+# ------------------------------------------------------------------------------
 
-tests: secrets.json | tapis docker
-	tapis actors deploy
-	sleep 5
-	tapis actors run -m 'my message' -e 'test_context_key=test_context_value' $$(cat .actorid)
+.PHONY: image
 
-tests-local: .env | docker tapis
-	# Build image using Tapis CLI and retrieve the image hash
-	@# TODO: find a less hacky way to do this
-	$(eval IMAGE = $(shell tapis actors deploy -R -f json 2>/dev/null | \
-		jq -r '.[].message|select(startswith("Successfully built"))' | \
-		awk '{print $$3}'))
-	docker run --rm -it --env-file $^ -v $(AGAVE_CREDS):/root/.agave $(IMAGE)
+default-actor-context: | git
+	# TODO: use cookiecutter template at
+	# https://github.com/shwetagopaul92/cc-tapis-v2-actors
+	mkdir -p $@
+	git clone https://github.com/TACC-Cloud/example-reactors example-reactors
+	cp -r example-reactors/hello_world/* $@
+	rm -rf ./example-reactors
 
-secrets.json:
-	if [ ! -f $@ ]; then \
-		echo '{"dont_reveal": "secret_value"}' > $@; \
-	fi
+image: Dockerfile default-actor-context | docker
+	docker build -f $< -t $(DOCKER_IMAGE) \
+		--build-arg SDK_BRANCH=main \
+		--build-arg TEMPLATE_DIR="$(word 2, $^)" \
+		.
 
-.env: secrets.json | python
-	cat $^ | python -c "$${JSON_TO_ENV}" > $@
