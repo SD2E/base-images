@@ -54,3 +54,6 @@ image: Dockerfile default-actor-context | docker
 		--build-arg TEMPLATE_DIR="$(word 2, $^)" \
 		.
 
+tests: image | docker
+	docker run --rm -v $(AGAVE_CRED_CACHE):/root/.agave $(DOCKER_IMAGE)
+
