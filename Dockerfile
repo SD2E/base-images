@@ -23,4 +23,4 @@ ADD ${TEMPLATE_DIR}/reactor.py /
 ADD ${TEMPLATE_DIR}/config.yml /
 ADD ${TEMPLATE_DIR}/*_schemas /
 
-CMD ["python", "-m", "reactors.cli", "run"]
+CMD ["python3", "-m", "reactors.cli", "run"]
