@@ -50,7 +50,7 @@ pycodestyle==2.6.0
 pycrypto==2.6.1
 pyflakes==1.6.0
 Pygments==2.6.1
-pygobject==3.24.1
+pygobject>=3.24.1
 pyparsing==2.4.7
 pyrsistent==0.16.0
 pytest==3.6.1
