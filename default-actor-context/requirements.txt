@@ -1,3 +1,4 @@
+pip==21.0.1
 agavepy==0.9.3
 alabaster==0.7.12
 appdirs==1.4.4
@@ -46,7 +47,6 @@ more-itertools==8.5.0
 multi-key-dict==2.0.3
 packaging==20.4
 pbr==5.4.5
-petname==2.6
 pluggy==0.6.0
 py==1.9.0
 pycodestyle==2.6.0
