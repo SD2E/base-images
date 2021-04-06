@@ -1,0 +1,13 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "AbacoMessage",
+    "description": "Accepts any valid JSON",
+    "type": "object",
+    "properties": {
+        "my_message": {
+            "description": "",
+            "type": "string"
+        }
+    },
+    "required": ["my_message"]
+}
