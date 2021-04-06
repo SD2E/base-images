@@ -1,3 +1,4 @@
+git+https://github.com/TACC-Cloud/python-reactors.git@main
 agavepy==0.9.3
 alabaster==0.7.12
 appdirs==1.4.4
