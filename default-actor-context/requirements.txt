@@ -74,7 +74,7 @@ SPARQLWrapper==1.8.5
 Sphinx==1.7.5
 sphinxcontrib-serializinghtml==1.1.4
 sphinxcontrib-websupport==1.2.4
-synbiohub-adapter==1.4
+git+https://github.com/SD2E/synbiohub_adapter.git@v1.3
 tacconfig==0.5.3
 tenacity==6.2.0
 text-unidecode==1.2
