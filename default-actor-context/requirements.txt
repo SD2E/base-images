@@ -15,7 +15,6 @@ cloudpickle==1.6.0
 CommonMark==0.5.4
 configparser==5.0.0
 coverage==4.5.1
-cryptography==1.9
 decorator==4.4.2
 Deprecated==1.2.10
 distlib==0.3.1
@@ -36,8 +35,6 @@ Jinja2==2.11.2
 jmespath==0.10.0
 jq==1.0.2
 jsonschema==2.6.0
-keyring==10.4.0
-keyrings.alt==2.2
 lollipop==1.1.7
 lxml==4.5.2
 Markdown==2.4
@@ -70,7 +67,6 @@ requests==2.24.0
 requests-futures==1.0.0
 requests-toolbelt==0.9.1
 sbol2==1.1
-SecretStorage==2.3.1
 semver==2.10.2
 six==1.10.0
 snowballstemmer==2.0.0
