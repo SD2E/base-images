@@ -47,6 +47,7 @@ default-actor-context: | git
 image: Dockerfile default-actor-context | docker
 	docker build -f $< -t $(DOCKER_IMAGE) \
 		--build-arg SDK_BRANCH=main \
+		--build-arg PYTHON_VERSION=3.6.3 \
 		--build-arg TEMPLATE_DIR="$(word 2, $^)" \
 		.
 
