@@ -64,9 +64,6 @@ pytz==2020.1
 PyYAML==5.3.1
 rdflib==5.0.0
 recommonmark==0.4.0
-requests==2.24.0
-requests-futures==1.0.0
-requests-toolbelt==0.9.1
 sbol2==1.1
 semver==2.10.2
 six==1.10.0
