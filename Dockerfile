@@ -23,7 +23,8 @@ RUN wget ${PYTHON_TARBALL} -O ${PYTHON_STUB}.tgz && \
     tar -xzf ${PYTHON_STUB}.tgz -C ${PYTHON_STUB} --strip-components 1 && \
     cd ${PYTHON_STUB} && \
     ./configure --enable-optimizations && \
-    make install
+    make install && make clean && \
+    python3 -m pip install --upgrade pip
 
 # build arguments
 ARG SDK_BRANCH=main
