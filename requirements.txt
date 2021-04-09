@@ -2,7 +2,6 @@
 git+https://github.com/TACC-Cloud/python-reactors.git@main
 git+https://github.com/SD2E/synbiohub_adapter.git@v1.3
 
-petname
 alabaster==0.7.12
 appdirs==1.4.4
 asn1crypto==0.22.0
