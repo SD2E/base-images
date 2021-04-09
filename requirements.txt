@@ -1,3 +1,4 @@
+git+https://github.com/eho-tacc/python-petname.git@master
 # TODO
 # git+https://github.com/TACC-Cloud/python-reactors.git@main
 pip>=21.0.1
