@@ -4,12 +4,23 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends -yq install \
         tzdata build-essential checkinstall zlib1g libreadline-gplv2-dev \
         libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev \
-        libc6-dev libbz2-dev && \
+        libc6-dev libbz2-dev language-pack-en && \
     # TODO: remove
     # Quality of life config
     apt-get -yq install git curl wget vim zsh gcc make ripgrep && \
     chsh -s $(which zsh) && \
     echo 'bindkey -v' > ~/.zshrc
+
+# set locale, preventing python3.6 UnicodeDecodeErrors
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+ENV LC_CTYPE en_US.UTF-8
+ENV LC_NUMERIC en_US.UTF-8
+ENV LC_TIME en_US.UTF-8
+ENV LC_COLLATE en_US.UTF-8
+ENV LC_MONETARY en_US.UTF-8
+ENV LC_MESSAGES en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
 
 # python build args
 ARG PYTHON_VERSION=3.6.3

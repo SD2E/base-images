@@ -2,7 +2,6 @@
 git+https://github.com/eho-tacc/python-petname.git@master
 git+https://github.com/TACC-Cloud/python-reactors.git@main
 git+https://github.com/SD2E/synbiohub_adapter.git@v1.3
-# TODO: pin agavepy
 
 alabaster==0.7.12
 appdirs==1.4.4
