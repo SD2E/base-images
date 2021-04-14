@@ -1,6 +1,6 @@
 # Base Images
 
-[![Build Status](https://travis-ci.org/SD2E/base-images.svg?branch=master)](https://travis-ci.org/SD2E/base-images)
+[![Docker publish](https://github.com/SD2E/base-images/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/SD2E/base-images/actions/workflows/docker-publish.yml)
 
 This repository supports development, maintenance, and extension of the base
 images used by the SD2 program to sharing code and capabilities.
