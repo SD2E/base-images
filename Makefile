@@ -6,7 +6,7 @@ GITREF_FULL=$(shell git rev-parse HEAD)
 # Sanity checks
 # ------------------------------------------------------------------------------
 
-PROGRAMS := git docker python poetry singularity tox tapis
+PROGRAMS := git docker $(PYTHON) poetry singularity tox tapis
 .PHONY: $(PROGRAMS)
 .SILENT: $(PROGRAMS)
 
@@ -16,7 +16,7 @@ docker:
 		echo "\n[ERROR] Could not communicate with docker daemon.\n"; \
 		exit 1; \
 	fi
-python tapis:
+$(PYTHON) tapis:
 	$@ --help &> /dev/null; \
 	if [ ! $$? -eq 0 ]; then \
 		echo "[ERROR] $@ does not seem to be on your path. Please install $@"; \
@@ -35,16 +35,12 @@ git:
 
 .PHONY: image
 
-default-actor-context: | git
-	# TODO: use cookiecutter template at
-	# https://github.com/shwetagopaul92/cc-tapis-v2-actors
-	mkdir -p $@
-	git clone --single-branch --branch develop-eho \
-		https://github.com/TACC-Cloud/example-reactors.git example-reactors
-	cp -r example-reactors/hello_world/* $@
-	rm -rf ./example-reactors
+default_actor_context: | $(PYTHON)
+	$(PYTHON) -m cookiecutter --no-input -c main --directory default -vf \
+		https://github.com/TACC-Cloud/cc-tapis-v2-actors.git \
+		name=$@ alias=$@
 
-image: Dockerfile default-actor-context | docker
+image: Dockerfile default_actor_context | docker
 	docker build -f $< -t $(DOCKER_IMAGE) \
 		--build-arg SDK_BRANCH=main \
 		--build-arg PYTHON_VERSION=3.6.3 \

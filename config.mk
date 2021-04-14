@@ -1,3 +1,4 @@
+PYTHON ?= python3
 AGAVE_CRED_CACHE ?= ~/.agave
 DOCKER_ORG ?= enho
 DOCKER_REPO ?= reactors
