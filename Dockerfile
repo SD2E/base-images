@@ -5,11 +5,7 @@ RUN apt-get update && \
         tzdata build-essential checkinstall zlib1g libreadline-gplv2-dev \
         libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev \
         libc6-dev libbz2-dev language-pack-en && \
-    # TODO: remove
-    # Quality of life config
-    apt-get -yq install git curl wget vim zsh gcc make ripgrep && \
-    chsh -s $(which zsh) && \
-    echo 'bindkey -v' > ~/.zshrc
+    apt-get -yq install git curl wget vim gcc make
 
 # set locale, preventing python3.6 UnicodeDecodeErrors
 ENV LANG en_US.UTF-8
