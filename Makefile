@@ -36,7 +36,8 @@ git:
 .PHONY: image
 
 default_actor_context: | $(PYTHON)
-	$(PYTHON) -m cookiecutter --no-input -c main --directory default -vf \
+	rm -r $@ || :
+	$(PYTHON) -m cookiecutter --no-input -fc main --directory sd2e_base \
 		https://github.com/TACC-Cloud/cc-tapis-v2-actors.git \
 		name=$@ alias=$@
 
