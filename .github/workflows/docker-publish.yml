@@ -60,29 +60,6 @@ jobs:
             -e TAPIS_USERNAME=${TAPIS_USERNAME} \
             -e TAPIS_PASSWORD=${{ secrets.TAPIS_PASSWORD }} \
             ${DOCKER_IMAGE}
-
-  # Push image to hub.docker.com
-  # See also https://docs.docker.com/docker-hub/builds/
-  push:
-    # Ensure test job passes before pushing image.
-    needs: test
-
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Build image
-        run: DOCKER_IMAGE=${DOCKER_IMAGE} make image
-
-      - name: Log into registry
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u $DOCKER_USER --password-stdin
-
-      - name: Push image
-        run: docker push ${DOCKER_IMAGE}
-
   push:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
