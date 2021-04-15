@@ -47,6 +47,8 @@ jobs:
         run: DOCKER_IMAGE=${DOCKER_IMAGE} make -B image
       - name: Run tests
         run: |
+          echo ${DOCKER_IMAGE}
+          echo $DOCKER_IMAGE
           docker run --rm -e TAPIS_BASE_URL=${TAPIS_BASE_URL} \
             -e TAPIS_USERNAME=${TAPIS_USERNAME} \
             -e TAPIS_PASSWORD=${{ secrets.TAPIS_PASSWORD }} \
