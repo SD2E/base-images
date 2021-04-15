@@ -17,10 +17,7 @@ env:
   # Docker image
   # DOCKER_PASSWORD accessible via secrets
   DOCKER_USER: enho
-  DOCKER_ORG: enho
-  DOCKER_REPO: reactors
-  DOCKER_TAG: python3
-  DOCKER_IMAGE: $DOCKER_ORG/$DOCKER_REPO:$DOCKER_TAG
+  DOCKER_IMAGE: enho/reactors:python3
 
   # Tapis credentials for testing
   # TAPIS_PASSWORD accessible via secrets
@@ -31,21 +28,14 @@ jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test:
+    name: Build Docker image and run tests
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.7
         uses: actions/setup-python@v2
         with:
           python-version: '3.7'
-      - name: Test env
-        run: |
-          echo $DOCKER_ORG
-          echo ${DOCKER_ORG}
-          echo $DOCKER_IMAGE
-          echo ${DOCKER_IMAGE}
-          exit 1
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -54,13 +44,14 @@ jobs:
         run: DOCKER_IMAGE=${DOCKER_IMAGE} make -B image
       - name: Run tests
         run: |
-          echo ${DOCKER_IMAGE}
-          echo $DOCKER_IMAGE
+          echo "building DOCKER_IMAGE=${DOCKER_IMAGE}"
           docker run --rm -e TAPIS_BASE_URL=${TAPIS_BASE_URL} \
             -e TAPIS_USERNAME=${TAPIS_USERNAME} \
             -e TAPIS_PASSWORD=${{ secrets.TAPIS_PASSWORD }} \
             ${DOCKER_IMAGE}
+
   push:
+    needs: test
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
     steps:
