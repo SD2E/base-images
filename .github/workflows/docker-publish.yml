@@ -12,7 +12,7 @@ on:
       - master
 
 env:
-  # TODO: Change variable to your image's name.
+  # TODO
   IMAGE_NAME: reactors
   IMAGE_TAG: python3
 
@@ -47,6 +47,8 @@ jobs:
         run: |
           GH_ACTOR=${{ github.actor }}
           echo GH_ACTOR=$GH_ACTOR
+          # TODO: enter secrets
+          # TODO: config Docker org
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u $GH_ACTOR --password-stdin
 
       - name: Push image
@@ -59,5 +61,6 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo IMAGE_TAG=$IMAGE_TAG
 
+          # TODO: consider using make
           docker tag $IMAGE_NAME $IMAGE_ID:$IMAGE_TAG
           docker push $IMAGE_ID:$IMAGE_TAG

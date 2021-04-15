@@ -1,17 +1,7 @@
-# API tenant config
-TENANT_NAME=DARPA-SD2E
-TENANT_KEY=sd2e
-CHANNEL=stable
-
-# Make support
-MAKE_OBJ=reactors
-# Docker
-TENANT_DOCKER_ORG=sd2e
-PYTHON_PIP_VERSION=9.0.3
-AGAVEPY_BRANCH=develop
-
-# Github
-TENANT_GITHUB_ORG=SD2E
-
-# Travis
-TENANT_TRAVIS_ORG=SD2E
+PYTHON ?= python3
+AGAVE_CRED_CACHE ?= ~/.agave
+# TODO
+DOCKER_ORG ?= enho
+DOCKER_REPO ?= reactors
+DOCKER_TAG ?= python3
+DOCKER_IMAGE ?= $(DOCKER_ORG)/$(DOCKER_REPO):$(DOCKER_TAG)
