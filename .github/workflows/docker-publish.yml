@@ -41,7 +41,7 @@ jobs:
           python -m pip install cookiecutter tapis-cli
       - name: Get default actor context
         run: |
-          	python -m cookiecutter --no-input -fc main --directory sd2e_base https://github.com/TACC-Cloud/cc-tapis-v2-actors.git name=default_actor_context alias=default_actor_context
+          python -m cookiecutter --no-input -fc main --directory sd2e_base https://github.com/TACC-Cloud/cc-tapis-v2-actors.git name=default_actor_context alias=default_actor_context
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
