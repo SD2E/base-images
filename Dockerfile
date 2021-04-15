@@ -34,8 +34,7 @@ RUN wget ${PYTHON_TARBALL} -O ${PYTHON_STUB}.tgz && \
     python3 -m pip install --upgrade pip
 
 # build arguments
-ARG SDK_BRANCH=main
-ARG TEMPLATE_DIR=cc-tapis-v2-actors
+ARG TEMPLATE_DIR=default_actor_context
 ARG PYTHON=python3
 ARG BASE_IMAGE_REQUIREMENTS=requirements.txt
 ENV AGAVE_CRED_CACHE=/root/.agave
