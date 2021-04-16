@@ -42,11 +42,7 @@ default_actor_context: | $(PYTHON)
 		name=$@ alias=$@
 
 image: Dockerfile default_actor_context | docker
-	docker build -f $< -t $(DOCKER_IMAGE) \
-		--build-arg SDK_BRANCH=main \
-		--build-arg PYTHON_VERSION=3.6.3 \
-		--build-arg TEMPLATE_DIR="$(word 2, $^)" \
-		.
+	docker build -f $< -t $(DOCKER_IMAGE) .
 
 tests: image | docker
 	docker run --rm -v $(AGAVE_CRED_CACHE):/root/.agave $(DOCKER_IMAGE)
