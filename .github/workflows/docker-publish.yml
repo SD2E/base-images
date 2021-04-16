@@ -6,11 +6,6 @@ on:
     branches:
       - master
 
-  pull_request:
-    # run tests only for pull requests to `master`
-    branches:
-      - master
-
 env:
   # Docker image
   # DOCKER_PASSWORD accessible via secrets
