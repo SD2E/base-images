@@ -55,7 +55,6 @@ jobs:
           pull: true
           push: false
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}
-          cache-to: type=inline
           tags: ${{ env.DOCKER_IMAGE }}
 
       # test
@@ -86,5 +85,4 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          cache-from: type=inline
           tags: ${{ env.DOCKER_IMAGE }}
