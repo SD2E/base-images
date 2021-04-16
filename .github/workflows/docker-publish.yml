@@ -24,39 +24,41 @@ env:
 
 jobs:
 
-  build:
-    name: Build image 
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-      - name: Install dependencies
-        run: python -m pip install -q --upgrade pip cookiecutter
-      - name: Get default actor context
-        run: |
-          python -m cookiecutter --no-input -fc main --directory sd2e_base \
-            https://github.com/TACC-Cloud/cc-tapis-v2-actors.git \
-            name=default_actor_context alias=default_actor_context
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Build Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile
-          pull: true
-          push: false
-          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}
-          cache-to: type=inline
-          tags: ${{ env.DOCKER_IMAGE }}
+  # build:
+  #   name: Build image 
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Set up Python 3.7
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: '3.7'
+  #     - name: Install dependencies
+  #       run: python -m pip install -q --upgrade pip cookiecutter
+  #     - name: Get default actor context
+  #       run: |
+  #         python -m cookiecutter --no-input -fc main --directory sd2e_base \
+  #           https://github.com/TACC-Cloud/cc-tapis-v2-actors.git \
+  #           name=default_actor_context alias=default_actor_context
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v1
+  #     - name: Pull Docker image to cache
+  #       run: docker pull ${{ env.DOCKER_IMAGE }}
+  #     - name: Build Docker image
+  #       uses: docker/build-push-action@v2
+  #       with:
+  #         context: .
+  #         file: Dockerfile
+  #         pull: true
+  #         push: false
+  #         cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}
+  #         cache-to: type=inline
+  #         tags: ${{ env.DOCKER_IMAGE }}
 
   test:
     name: Run image tests
     runs-on: ubuntu-latest
-    needs: build
+    # needs: build
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.7
@@ -70,23 +72,29 @@ jobs:
           # TODO: reuse and persist client
           touch ~/.tapis_firstrun
           tapis auth init --no-git --no-registry --api-server $TAPIS_BASE_URL --username $TAPIS_USER --password ${{ secrets.TAPIS_PASSWORD }} -f json 
-          [ -d ~/.agave ] || (echo "could not find Tapis/Agave cache" &&  exit 1)
+          [ -d ~/.agave ] || (echo "failed to generate Tapis/Agave cache" && exit 1)
+      - name: Get Tapis access token
+        run: |
+          TAPIS_TOKEN="$(tapis auth show -f json | jq -rc .access_token)"
+          # echo "TAPIS_TOKEN=$TAPIS_TOKEN" >> $GITHUB_ENV
       - name: Test image using default CMD
         run: |
-          docker run --rm -v ~/.agave:/root/.agave ${{ env.DOCKER_IMAGE }}
+          docker run --rm -e _abaco_access_token=${TAPIS_TOKEN} \
+            -e _abaco_api_server=${TAPIS_BASE_URL} \
+            ${{ env.DOCKER_IMAGE }}
 
-  push:
-    name: Push Docker image to Docker Hub
-    needs: test
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-      - name: Login to DockerHub
-        uses: docker/login-action@v1 
-        with:
-          username: ${{ env.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Push to DockerHub
-        run: docker push ${{ env.DOCKER_IMAGE }}
+  # push:
+  #   name: Push Docker image to Docker Hub
+  #   needs: test
+  #   if: github.event_name == 'push'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out the repo
+  #       uses: actions/checkout@v2
+  #     - name: Login to DockerHub
+  #       uses: docker/login-action@v1 
+  #       with:
+  #         username: ${{ env.DOCKER_USER }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
+  #     - name: Push to DockerHub
+  #       run: docker push ${{ env.DOCKER_IMAGE }}
