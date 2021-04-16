@@ -15,7 +15,10 @@ env:
   # Docker image
   # DOCKER_PASSWORD accessible via secrets
   DOCKER_USER: enho
-  DOCKER_IMAGE: enho/reactors:python3
+  DOCKER_ORG: enho
+  DOCKER_REPO: reactors
+  DOCKER_TAG: python3
+  DOCKER_IMAGE: ${{ env.DOCKER_ORG }}/${{ env.DOCKER_REPO }}:${{ env.DOCKER_TAG }}
 
   # Tapis credentials for testing
   # TAPIS_PASSWORD accessible via secrets
@@ -87,4 +90,6 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: ${{ env.DOCKER_IMAGE }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}
+            ${{ env.DOCKER_ORG }}/${{ env.DOCKER_REPO }}:latest
