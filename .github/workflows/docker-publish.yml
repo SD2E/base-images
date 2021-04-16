@@ -21,6 +21,7 @@ env:
   # TAPIS_PASSWORD accessible via secrets
   TAPIS_BASE_URL: https://api.sd2e.org/
   TAPIS_USER: eho
+  TAPIS_CLIENT: _cli-sd2e-actions-docker-publish
 
 jobs:
 
@@ -69,17 +70,16 @@ jobs:
         run: python -m pip install -q --upgrade pip git+https://github.com/TACC-Cloud/tapis-cli
       - name: Authenticate Tapis client
         run: |
-          # TODO: reuse and persist client
           touch ~/.tapis_firstrun
-          tapis auth init --no-git --no-registry --api-server $TAPIS_BASE_URL --username $TAPIS_USER --password ${{ secrets.TAPIS_PASSWORD }} -f json 
-          [ -d ~/.agave ] || (echo "failed to generate Tapis/Agave cache" && exit 1)
-      - name: Get Tapis access token
-        run: |
-          TAPIS_TOKEN="$(tapis auth show -f json | jq -rc .access_token)"
-          # echo "TAPIS_TOKEN=$TAPIS_TOKEN" >> $GITHUB_ENV
+          tapis auth init --no-git --no-registry \
+            --client-name $TAPIS_CLIENT --api-server $TAPIS_BASE_URL \
+            --username $TAPIS_USER --password ${{ secrets.TAPIS_PASSWORD }} 
       - name: Test image using default CMD
         run: |
-          docker run --rm -e _abaco_access_token=${TAPIS_TOKEN} \
+          TAPIS_TOKEN="$(tapis auth show -f json | jq -rc .access_token)"
+          [ -z $TAPIS_TOKEN ] && echo failed to generate Tapis access token && exit 1
+          docker run --rm \
+            -e _abaco_access_token=${TAPIS_TOKEN} \
             -e _abaco_api_server=${TAPIS_BASE_URL} \
             ${{ env.DOCKER_IMAGE }}
 
