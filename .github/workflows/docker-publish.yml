@@ -43,12 +43,17 @@ jobs:
         run: |
           touch ~/.tapis_firstrun
           tapis auth init --no-git --no-registry --api-server $TAPIS_BASE_URL --username $TAPIS_USER --password ${{ secrets.TAPIS_PASSWORD }} -f json 
-          tapis auth show
+          [ -d ~/.agave ] || (echo "could not find Tapis/Agave cache" &&  exit 1)
       - name: Get default actor context
         run: |
           python -m cookiecutter --no-input -fc main --directory sd2e_base https://github.com/TACC-Cloud/cc-tapis-v2-actors.git name=default_actor_context alias=default_actor_context
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
@@ -56,16 +61,14 @@ jobs:
           file: Dockerfile
           pull: true
           push: false
-          cache-from: type=registry,ref=enho/reactors:python3
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}
           cache-to: type=inline
-          # TODO: parametrize
-          tags: enho/reactors:python3 
+          tags: ${{ env.DOCKER_IMAGE }}
       - name: Run tests
         run: |
-          echo "building DOCKER_IMAGE=${DOCKER_IMAGE}"
           docker run --rm -e _abaco_access_token=${TAPIS_TOKEN} \
             -e _abaco_api_server=${TAPIS_BASE_URL} \
-            ${DOCKER_IMAGE}
+            ${{ env.DOCKER_IMAGE }}
 
   push:
     name: Push Docker image to Docker Hub
@@ -75,10 +78,16 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Push to Docker Hub
         uses: docker/build-push-action@v2
         with:
+          context: .
+          file: Dockerfile
+          pull: false
           push: true
-          username: $DOCKER_USER
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          tags: $DOCKER_IMAGE
+          tags: ${{ env.DOCKER_IMAGE }}
