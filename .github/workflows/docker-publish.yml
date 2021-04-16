@@ -14,15 +14,15 @@ on:
 env:
   # Docker image
   # DOCKER_PASSWORD accessible via secrets
-  DOCKER_USER: enho
-  DOCKER_ORG: enho
+  DOCKER_USER: sd2etest
+  DOCKER_ORG: sd2etest
   DOCKER_REPO: reactors
   DOCKER_TAG: python3
 
   # Tapis credentials for testing
   # TAPIS_PASSWORD accessible via secrets
   TAPIS_BASE_URL: https://api.sd2e.org/
-  TAPIS_USER: eho
+  TAPIS_USER: sd2etest
   TAPIS_CLIENT: _cli-sd2e-actions-docker-publish
 
 jobs:
