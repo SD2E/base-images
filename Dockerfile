@@ -53,11 +53,12 @@ RUN ${PYTHON} -m pip install cookiecutter && \
     cd $(dirname "${DEFAULT_ACTOR_CONTEXT}") && \
     ${PYTHON} -m cookiecutter --no-input -fc main --directory sd2e_base \
 		https://github.com/TACC-Cloud/cc-tapis-v2-actors.git \
-		name=${DEFAULT_ACTOR_CONTEXT} alias=${DEFAULT_ACTOR_CONTEXT}
-RUN cp ${DEFAULT_ACTOR_CONTEXT}/reactor.py / && \
+		name=${DEFAULT_ACTOR_CONTEXT} alias=${DEFAULT_ACTOR_CONTEXT} && \
+    cp ${DEFAULT_ACTOR_CONTEXT}/reactor.py / && \
     cp ${DEFAULT_ACTOR_CONTEXT}/config.yml / && \
-    cp -r ${DEFAULT_ACTOR_CONTEXT}/*_schemas /
-RUN ${PYTHON} -m pip install --ignore-installed -r ${DEFAULT_ACTOR_CONTEXT}/requirements.txt
+    cp -r ${DEFAULT_ACTOR_CONTEXT}/*_schemas / && \
+    ${PYTHON} -m pip install --ignore-installed -r \
+        ${DEFAULT_ACTOR_CONTEXT}/requirements.txt
 
 # add reactor assets from user's build context
 ONBUILD ADD requirements.txt /tmp/requirements.txt
