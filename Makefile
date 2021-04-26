@@ -35,13 +35,7 @@ git:
 
 .PHONY: image
 
-default_actor_context: | $(PYTHON)
-	rm -r $@ || :
-	$(PYTHON) -m cookiecutter --no-input -fc main --directory sd2e_base \
-		https://github.com/TACC-Cloud/cc-tapis-v2-actors.git \
-		name=$@ alias=$@
-
-image: Dockerfile default_actor_context | docker
+image: Dockerfile | docker
 	docker build -f $< -t $(DOCKER_IMAGE) .
 
 tests: image | docker
