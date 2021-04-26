@@ -38,13 +38,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.7'
-      - name: Install cookiecutter
-        run: python -m pip install -q cookiecutter git+https://github.com/TACC-Cloud/tapis-cli
-      - name: Get default actor context
-        run: |
-          python -m cookiecutter --no-input -fc main --directory sd2e_base \
-            https://github.com/TACC-Cloud/cc-tapis-v2-actors.git \
-            name=default_actor_context alias=default_actor_context
+      - name: Install Tapis CLI
+        run: python -m pip install -q git+https://github.com/TACC-Cloud/tapis-cli
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
