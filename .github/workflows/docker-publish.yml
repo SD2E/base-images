@@ -5,11 +5,15 @@ on:
     # Publish `master` as Docker `latest` image.
     branches:
       - master
+    paths-ignore:
+      - '**.md'
 
   pull_request:
     # run tests only for pull requests to `master`
     branches:
       - master
+    paths-ignore:
+      - '**.md'
 
 env:
   # Docker image
@@ -34,6 +38,14 @@ jobs:
       
       # install dependencies
       - uses: actions/checkout@v2
+      - name: Force locale to UTF-8
+        run: |
+          apt-get update -q
+          apt-get install -yq locales locales-all make
+          apt-get clean -q
+          echo "LC_ALL=en_US.UTF-8" >> $GITHUB_ENV
+          echo "LANG=en_US.UTF-8" >> $GITHUB_ENV
+          echo "LANGUAGE=en_US.UTF-8" >> $GITHUB_ENV
       - name: Set up Python 3.7
         uses: actions/setup-python@v2
         with:
@@ -50,6 +62,7 @@ jobs:
           context: .
           file: Dockerfile
           pull: true
+          load: true
           push: false
           tags: ${{ env.DOCKER_ORG }}/${{ env.DOCKER_REPO }}:${{ env.DOCKER_TAG }}
 

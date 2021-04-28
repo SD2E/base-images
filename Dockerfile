@@ -48,7 +48,7 @@ ENV SCRATCH=/mnt/ephemeral-01
 WORKDIR ${SCRATCH}
 RUN chmod a+rwx ${SCRATCH} && chmod g+rwxs ${SCRATCH}
 
-# add default reactor assets
+# add default reactor assets via cookiecutter
 RUN ${PYTHON} -m pip install cookiecutter && \
     cd $(dirname "${DEFAULT_ACTOR_CONTEXT}") && \
     ${PYTHON} -m cookiecutter --no-input -fc main --directory sd2e_base \
