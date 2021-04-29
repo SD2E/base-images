@@ -18,8 +18,8 @@ on:
 env:
   # Docker image
   # DOCKER_PASSWORD accessible via secrets
-  DOCKER_USER: enho
-  DOCKER_ORG: enho
+  DOCKER_USER: sd2etest
+  DOCKER_ORG: sd2etest
   DOCKER_REPO: reactors
   DOCKER_TAG: python3
 
