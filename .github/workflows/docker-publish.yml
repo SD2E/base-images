@@ -23,12 +23,6 @@ env:
   DOCKER_REPO: reactors
   DOCKER_TAG: python3
 
-  # Tapis credentials for testing
-  # TAPIS_PASSWORD accessible via secrets
-  TAPIS_BASE_URL: https://api.sd2e.org/
-  TAPIS_USER: eho
-  TAPIS_CLIENT: _cli-sd2e-actions-docker-publish
-
 jobs:
 
   build-test-push:
@@ -38,24 +32,14 @@ jobs:
       
       # install dependencies
       - uses: actions/checkout@v2
-      - name: Force locale to UTF-8
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -yq locales locales-all make
-          sudo apt-get clean -q
-          echo "LC_ALL=en_US.UTF-8" >> $GITHUB_ENV
-          echo "LANG=en_US.UTF-8" >> $GITHUB_ENV
-          echo "LANGUAGE=en_US.UTF-8" >> $GITHUB_ENV
       - name: Set up Python 3.7
         uses: actions/setup-python@v2
         with:
           python-version: '3.7'
-      - name: Install Tapis CLI
-        run: python -m pip install -q git+https://github.com/TACC-Cloud/tapis-cli
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      # build
+      # build & test
       - name: Build Docker image
         uses: docker/build-push-action@v2
         with:
@@ -65,22 +49,8 @@ jobs:
           load: true
           push: false
           tags: ${{ env.DOCKER_ORG }}/${{ env.DOCKER_REPO }}:${{ env.DOCKER_TAG }}
-
-      # test
-      - name: Authenticate Tapis client
-        run: |
-          touch ~/.tapis_firstrun
-          tapis auth init --no-git --no-registry \
-            --client-name $TAPIS_CLIENT --api-server $TAPIS_BASE_URL \
-            --username $TAPIS_USER --password ${{ secrets.TAPIS_PASSWORD }} 
       - name: Test image using default CMD
-        run: |
-          TAPIS_TOKEN="$(tapis auth show -f json | jq -rc .access_token)"
-          [ -z $TAPIS_TOKEN ] && echo failed to generate Tapis access token && exit 1
-          docker run --rm \
-            -e _abaco_access_token=${TAPIS_TOKEN} \
-            -e _abaco_api_server=${TAPIS_BASE_URL} \
-            ${{ env.DOCKER_ORG }}/${{ env.DOCKER_REPO }}:${{ env.DOCKER_TAG }}
+        run: docker run --rm ${{ env.DOCKER_ORG }}/${{ env.DOCKER_REPO }}:${{ env.DOCKER_TAG }}
       
       # push
       - name: Login to DockerHub
