@@ -1,88 +1,43 @@
 include config.mk
+GITREF=$(shell git rev-parse --short HEAD)
+GITREF_FULL=$(shell git rev-parse HEAD)
 
-CHANNEL := stable
-BASE := ""
-LANGUAGE := ""
+# ------------------------------------------------------------------------------
+# Sanity checks
+# ------------------------------------------------------------------------------
 
-TENANT_NAME := $(TENANT_NAME)
-TENANT_ID := $(TENANT_KEY)
-TENANT_DOCKER_ORG := $(TENANT_DOCKER_ORG)
-TENANT_GITHUB_ORG := $(TENANT_GITHUB_ORG)
-TENANT_TRAVIS_ORG := $(TENANT_TRAVIS_ORG)
+PROGRAMS := git docker $(PYTHON) poetry singularity tox tapis
+.PHONY: $(PROGRAMS)
+.SILENT: $(PROGRAMS)
 
-PREFIX := $(HOME)
+docker:
+	docker info 1> /dev/null 2> /dev/null && \
+	if [ ! $$? -eq 0 ]; then \
+		echo "\n[ERROR] Could not communicate with docker daemon.\n"; \
+		exit 1; \
+	fi
+$(PYTHON) tapis:
+	$@ --help &> /dev/null; \
+	if [ ! $$? -eq 0 ]; then \
+		echo "[ERROR] $@ does not seem to be on your path. Please install $@"; \
+		exit 1; \
+	fi
+git:
+	$@ -h &> /dev/null; \
+	if [ ! $$? -eq 129 ]; then \
+		echo "[ERROR] $@ does not seem to be on your path. Please install $@"; \
+		exit 1; \
+	fi
 
-BUILDS = base-build languages-build apps-build jupyter-build reactors-build
-IMAGES = base languages reactors apps
+# ------------------------------------------------------------------------------
+# Docker build
+# ------------------------------------------------------------------------------
 
-.SILENT: test
+.PHONY: image
 
-help:
-	echo "You can make base, languages, apps, reactors, clean"
+image: Dockerfile | docker
+	docker build -f $< -t $(DOCKER_IMAGE) .
 
-all: images
-	true
+tests: image | docker
+	docker run --rm -v $(AGAVE_CRED_CACHE):/root/.agave $(DOCKER_IMAGE)
 
-builds: $(BUILDS)
-	true
-
-images: $(IMAGES)
-	true
-
-tests:
-	echo "Not implemented"
-
-base-build:
-	bash scripts/build_bases.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(BASE)
-
-base: base-build
-	bash scripts/build_bases.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(BASE)
-
-languages-build:
-	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
-
-languages: languages-build
-	bash scripts/build_langs.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE) $(BASE)
-
-apps-build:
-	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE) $(BASE)
-
-apps: apps-build
-	bash scripts/build_apps.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE) $(BASE)
-
-jupyter-build: base-build
-	bash scripts/build_jupyter.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build
-
-jupyter: jupyter-build
-	bash scripts/build_jupyter.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release
-
-reactors-build:
-	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) $(CHANNEL) build $(LANGUAGE)
-
-reactors: reactors-build
-	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) $(CHANNEL) release $(LANGUAGE)
-
-reactors-edge:
-	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) edge build python3
-	bash scripts/build_reactors.sh $(TENANT_DOCKER_ORG) edge release python3
-
-reactors-clean:
-	cd reactors/python2 ; \
-	make clean
-	cd reactors/python3 ; \
-	make clean
-	cd reactors/python2-miniconda ; \
-	make clean
-	cd reactors/python3-miniconda ; \
-	make clean
-
-downstream:
-	scripts/trigger-travis.sh $(TENANT_GITHUB_ORG) base-images-custom $(TRAVIS_ACCESS_TOKEN)
-
-reactors-and-langs-edge:
-	make languages-build LANGUAGE=python3 BASE=ubuntu17 ; \
-	make reactors LANGUAGE=python3 CHANNEL=edge
-
-reactors-and-langs:
-	make languages-build LANGUAGE=python3 BASE=ubuntu17 ; \
-	make reactors LANGUAGE=python3 CHANNEL=stable

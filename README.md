@@ -1,117 +1,59 @@
-# Base Images
+# SD2E Base Images
 
-[![Build Status](https://travis-ci.org/SD2E/base-images.svg?branch=master)](https://travis-ci.org/SD2E/base-images)
+[![Docker publish](https://github.com/SD2E/base-images/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/SD2E/base-images/actions/workflows/docker-publish.yml)
 
-This repository supports development, maintenance, and extension of the base
-images used by the SD2 program to sharing code and capabilities. A matrix of
-Linux distributions and high-level languages is supported efficiently by
-this arrangement.
+This repository supports development, maintenance, and extension of the Docker base
+images used by the SD2 program for sharing code. In particular, this repository maintains the [`sd2e/reactors:python3`][3] base image.
 
-## Images Catalog
+## Basic Usage
 
-|                base                |                     languages                    |                apps               |                         reactors                         |
-|:----------------------------------:|:------------------------------------------------:|:---------------------------------:|:--------------------------------------------------------:|
-| alpine36 centos7 miniconda2 miniconda3 ubuntu16 ubuntu17 | ubuntu16/python2 ubuntu17/python3 ubuntu17/java8 | python2/ubuntu16 python3/ubuntu17 | python2/ubuntu16 python2-conda/ubuntu16 python3/ubuntu17 |
-
-## Architecture
-
-Images are layered hierarchically to promote layer caching and help ensure
-that essential configurations and computational assets get propagated
-to developers and researchers relying on them.
-
+The `sd2e/reactors:python3` base image is regularly pushed to [DockerHub][3]. One can pull the image using the [Docker CLI][4]:
+```bash
+docker pull sd2e/reactors:python3
 ```
-+-------------+
-|             |
-| <os>:dist   |
-|             |
-+-------------+
-     |||
-+-------------------------+    +----------------------+
-|                         |    |                      |
-| sd2e/base:<dist>(-edge) |....| sd2e/jupyterhub-user |
-|                         |    |                      |
-+-------------------------+    +----------------------+
-           |
-+---------------------------+  +-------------------------+
-|                           |  |                         |
-| sd2e/<lang>:<dist>(-edge) |--| sd2e/apps:<lang>(-edge) |
-|                           |  |                         |
-+---------------------------+  +-------------------------+
-           |
-+-----------------------------+
-|                             |
-| sd2e/reactors:<lang>(-edge) |
-|                             |
-+-----------------------------+
+...or use it as a base image in a Dockerfile for a custom [Tapis Actor/Reactor][5]:
+```Dockerfile
+FROM sd2e/reactors:python3
+RUN pip install -r my_requirements.txt
+# ...
+```
+Please see the [Tapis Reactors SDK][6] for more details on how to develop and deploy custom Actors.
+
+## Building and Testing
+
+### Using Docker CLI
+
+```bash
+docker build -t sd2e/reactors:python3 .
+docker run --rm -v $HOME/.agave:/root/.agave sd2e/reactors:python3 --help
 ```
 
-## Container image types
+### Using make
 
-Four image types are currently supported:
+- Change the `DOCKER_ORG` variable in [config.mk](config.mk) to a Dockerhub organization to which you have push access. 
+- If you have not already, install the [Tapis CLI][1] and log in using your Agave/Tapis credentials
+    - If necessary, also change the value of the [`AGAVE_CRED_CACHE`](config.mk) variable to the location of your Agave/Tapis credentials cache (in case your cache somewhere other than the default `$HOME/.agave`). 
+- Run tests in a Docker container: `make tests`
 
-* base : foundation layer for other images
-* language : images configured to support development in a specific language
-* apps : extension of the language environment supporting Agave apps
-* reactors : extension of the language environment supporting Reactors
+### Using act
 
-Coming soon:
-* jupyterhub-user : shared infrastructure for container and HPC Jupyter
-
-### Documentation
-
-* [base](base/README.md)
-* [languages](languages/README.md)
-* [reactors](reactors/README.md)
-* [apps](apps/README.md)
-
-## Building
-
-Requirements:
-* Make 3.81+ and Bash 3.2.57+
-* Docker CE/EE 17.05+ & plenty of HDD space free for use by Docker
-* An account on the public Docker Cloud registry
-
-Development is Makefile-driven, with parameterization via build variables.
-
-```
-| Targets                  | Command                      | Options                                   | Variables                   |
-|--------------------------|------------------------------|-------------------------------------------|-----------------------------|
-| build/push all images    | make all                     |                                           |                             |
-| build all images         | make builds                  |                                           |                             |
-| specific image type      | make <type>(-build)          | apps, base, jupyter,  languages, reactors |                             |
-| specific release channel | make <target>-(build)        | stable, edge                              | CHANNEL=<channel>           |
-| specific base            | make base-(build)            | ubuntu16, ubuntu17, miniconda3, ubuntu18  | BASE=<dist>                 |
-| specific language        | make language-(build)        | python2, python3                          | LANGUAGE=<lang>             |
-| specific language + base | make [apps,reactors]-(build) | see above                                 | LANGUAGE=<lang> BASE=<dist> |
+The [Docker publish Action](./.github/workflows/docker-publish.yml) builds, tests, and pushes the `reactors:python3` base image. You can run these tests locally using the [act CLI][2]. Note that passwords for DockerHub and Tapis should be passed as `--secret`s, while other options such as DockerHub organization should be passed as `--env`s.
+```bash
+act --secret TAPIS_PASSWORD='my_tapis_password' --env TAPIS_USER='my_tapis_username' pull_request
 ```
 
-For example, the following command builds, but doesn't push, the `python2`
-language image based on `ubuntu16` using `Dockerfile-edge`.
-
-```shell
-make languages-build LANGUAGE=python2 BASE=ubuntu16 CHANNEL=edge
+To additionally push the Docker image, pass the `push` event with Docker credentials as arguments. Note that this requires push permissions for the specified `DOCKER_USER` and `DOCKER_ORG`.
+```bash
+act --secret TAPIS_PASSWORD='my_tapis_password' --secret DOCKER_PASSWORD='my_dockerhub_password' \
+    --env DOCKER_USER='my_dockerhub_username' --env DOCKER_ORG='my_dockerhub_organization' \
+    --env TAPIS_USER='my_tapis_username' push
 ```
 
-### Special variables
+Please see the [act documentation][2] for details.
 
-Values passed to these variables inform the build process:
-
-* `AGAVEPY_BRANCH` - AgavePy code branch [develop]
-* `PYTHON_PIP_VERSION` - Version of pip installed in Python images [9.0.3]
-* `NO_CACHE` - Rebuild everything without the Docker cache. [0]
-* `NO_REMOVE` - Don't remove intermediate containers (helpful for debugging). [0]
-* `CHANNEL` - Default is [stable]. Repositories explicitly also support `edge`
-* `DOCKER_PULL` - Set `DOCKER_PULL=1` to force pull on build. [0]
-
-Example: Build Python2 based on Pip 9.0.1 and don't remove intermediates.
-
-```shell
-make languages-build LANGUAGE=python2 PYTHON_PIP_VERSION=9.0.1 NO_REMOVE=1
-```
-
-## Testing
-
-Formal testing is not fully implemented, though container builds are conducted
-automatically via TravisCI on push to any branch. Images are pushed automatically
-to the SD2E DockerHub registry on successful commits to `master`.
-
+[1]: https://tapis-cli.readthedocs.io/en/latest/
+[2]: https://github.com/nektos/act
+[3]: https://hub.docker.com/r/sd2e/reactors
+[4]: https://www.docker.com/
+[5]: https://tapis-cli.readthedocs.io/en/latest/usage/actors.html
+[6]: https://github.com/TACC-Cloud/python-reactors

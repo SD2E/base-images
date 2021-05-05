@@ -1,9 +1,0 @@
-#####################
-# Reactors SDKs     #
-#####################
-tenacity>=5.0.2
-# Asyncio support
-requests_futures>=0.9.7
-aiohttp
-cchardet
-aiodns
