@@ -35,13 +35,12 @@ RUN wget ${PYTHON_TARBALL} -O ${PYTHON_STUB}.tgz && \
 
 # build arguments
 ARG DEFAULT_ACTOR_CONTEXT=/tmp/default_actor_context
-ARG PYTHON=python3
 ARG BASE_IMAGE_REQUIREMENTS=requirements.txt
 ENV AGAVE_CRED_CACHE=/root/.agave
 
 # install Python dependencies, including Reactors SDK
 ADD ${BASE_IMAGE_REQUIREMENTS} /tmp/base-image-requirements.txt
-RUN ${PYTHON} -m pip install -r /tmp/base-image-requirements.txt
+RUN python3 -m pip install -r /tmp/base-image-requirements.txt
 
 # ephemeral working directory
 ENV SCRATCH=/mnt/ephemeral-01
@@ -49,20 +48,20 @@ WORKDIR ${SCRATCH}
 RUN chmod a+rwx ${SCRATCH} && chmod g+rwxs ${SCRATCH}
 
 # add default reactor assets via cookiecutter
-RUN ${PYTHON} -m pip install cookiecutter && \
+RUN python3 -m pip install cookiecutter && \
     cd $(dirname "${DEFAULT_ACTOR_CONTEXT}") && \
-    ${PYTHON} -m cookiecutter --no-input -fc main --directory sd2e_base \
+    python3 -m cookiecutter --no-input -fc main --directory sd2e_base \
 		https://github.com/TACC-Cloud/cc-tapis-v2-actors.git \
 		name=${DEFAULT_ACTOR_CONTEXT} alias=${DEFAULT_ACTOR_CONTEXT} && \
     cp ${DEFAULT_ACTOR_CONTEXT}/reactor.py / && \
     cp ${DEFAULT_ACTOR_CONTEXT}/config.yml / && \
     cp -r ${DEFAULT_ACTOR_CONTEXT}/*_schemas / && \
-    ${PYTHON} -m pip install --ignore-installed -r \
+    python3 -m pip install --ignore-installed -r \
         ${DEFAULT_ACTOR_CONTEXT}/requirements.txt
 
 # add reactor assets from user's build context
 ONBUILD ADD requirements.txt /tmp/requirements.txt
-ONBUILD RUN ${PYTHON} -m pip install --ignore-installed -r /tmp/requirements.txt
+ONBUILD RUN python3 -m pip install --ignore-installed -r /tmp/requirements.txt
 ONBUILD ADD reactor.py /
 ONBUILD ADD config.yml /
 ONBUILD ADD *_schemas /
